@@ -1,7 +1,8 @@
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { Outlet } from "react-router-dom";
 
-function MainLayout({ children }) {
+function MainLayout() {
   return (
     <>
       <Navbar />
@@ -17,7 +18,7 @@ function MainLayout({ children }) {
             minHeight: "100vh",
           }}
         >
-          {children}
+          <Outlet />
         </div>
       </div>
     </>

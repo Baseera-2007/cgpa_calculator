@@ -1,83 +1,65 @@
-import { Link } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Students() {
+  const navigate = useNavigate();
+
+  const [search, setSearch] = useState("");
+
+  const [students] = useState([
+    { id: 1, name: "Student A", reg: "921724113001", cgpa: 8.5 },
+    { id: 2, name: "Student B", reg: "921724113002", cgpa: 9.1 },
+  ]);
+
   return (
-    <MainLayout>
-      <div style={{ padding: "30px" }}>
-        <h1>Students</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>👨‍🎓 Students List</h1>
 
-        <table
-          border="1"
-          cellPadding="10"
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "20px",
-          }}
-        >
-          <thead>
-            <tr>
-              <th>Register No</th>
-              <th>Name</th>
-              <th>Section</th>
-              <th>CGPA</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      {/* SEARCH */}
+      <input
+        type="text"
+        placeholder="Search student..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+          padding: "10px",
+          width: "300px",
+          marginBottom: "20px",
+        }}
+      />
 
-          <tbody>
-            <tr>
-              <td>921724113001</td>
-              <td>Aisha</td>
-              <td>A</td>
-              <td>9.15</td>
-              <td>
-                <Link to="/student/101">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
+      {/* TABLE */}
+      <table border="1" cellPadding="10" width="100%">
+        <thead>
+          <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>CGPA</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-            <tr>
-              <td>921724113002</td>
-              <td>Rahul</td>
-              <td>A</td>
-              <td>8.92</td>
-              <td>
-                <Link to="/student/102">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
-
-            <tr>
-              <td>921724113003</td>
-              <td>Priya</td>
-              <td>A</td>
-              <td>9.41</td>
-              <td>
-                <Link to="/student/103">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
-
-            <tr>
-              <td>921724113004</td>
-              <td>Arun</td>
-              <td>A</td>
-              <td>8.80</td>
-              <td>
-                <Link to="/student/104">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </MainLayout>
+        <tbody>
+          {students
+            .filter((s) =>
+              s.name.toLowerCase().includes(search.toLowerCase()) ||
+              s.reg.includes(search)
+            )
+            .map((s) => (
+              <tr key={s.id}>
+                <td>{s.reg}</td>
+                <td>{s.name}</td>
+                <td>{s.cgpa}</td>
+                <td>
+                  <button onClick={() => navigate("/student-details")}>
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

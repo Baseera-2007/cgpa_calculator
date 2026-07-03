@@ -1,4 +1,3 @@
-import MainLayout from "../layouts/MainLayout";
 import { parseResultPDF } from "../utils/pdfParser";
 
 function UploadResult() {
@@ -15,7 +14,7 @@ function UploadResult() {
   };
 
   return (
-    <MainLayout>
+    <div style={{ padding: "20px" }}>
       <h1 style={{ color: "#1e3a8a" }}>Upload Semester Results</h1>
 
       <p>
@@ -113,7 +112,7 @@ function UploadResult() {
           Upload PDF
         </button>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
