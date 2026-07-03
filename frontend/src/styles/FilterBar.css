@@ -1,0 +1,40 @@
+.filter-container {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.08);
+  margin-bottom: 30px;
+}
+
+.filter-container h2 {
+  color: #1e3a8a;
+  margin-bottom: 20px;
+}
+
+.department {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.filters {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter label {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.filter select {
+  width: 220px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}

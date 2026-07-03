@@ -1,0 +1,80 @@
+.student-table-container {
+  margin-top: 40px;
+}
+
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.student-header h2 {
+  color: #1e3a8a;
+}
+
+.add-btn {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.add-btn:hover {
+  background: #163172;
+}
+
+.search-box {
+  width: 350px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.student-table th {
+  background: #1e3a8a;
+  color: white;
+  padding: 15px;
+}
+
+.student-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.student-table tr:hover {
+  background: #f5f7fb;
+}
+
+.edit-btn {
+  background: orange;
+  color: white;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 5px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
