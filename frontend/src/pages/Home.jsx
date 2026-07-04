@@ -1,6 +1,5 @@
 import FilterBar from "../components/FilterBar";
 import Dashboard from "../components/Dashboard";
-import StudentTable from "../components/StudentTable";
 
 function Home() {
   return (
@@ -9,7 +8,14 @@ function Home() {
         padding: "30px",
       }}
     >
-      <h1 style={{ color: "#1e3a8a", marginBottom: "10px" }}>
+      <h1
+        style={{
+          color: "#1e3a8a",
+          marginBottom: "10px",
+          fontSize: "32px",
+          fontWeight: "bold",
+        }}
+      >
         🎓 CSBS Academic Management System
       </h1>
 
@@ -17,18 +23,19 @@ function Home() {
         style={{
           color: "#555",
           fontSize: "17px",
-          marginBottom: "25px",
+          marginBottom: "30px",
+          lineHeight: "28px",
         }}
       >
         Manage student records, upload semester results, calculate SGPA &
         CGPA, and generate academic reports from one platform.
       </p>
 
+      {/* Only Batch Selection */}
       <FilterBar />
 
+      {/* Dashboard */}
       <Dashboard />
-
-      <StudentTable />
     </div>
   );
 }

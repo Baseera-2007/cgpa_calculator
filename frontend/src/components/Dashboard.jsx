@@ -1,4 +1,11 @@
-import { FaUsers, FaChartLine, FaUserGraduate, FaTrophy } from "react-icons/fa";
+import {
+  FaUsers,
+  FaChartLine,
+  FaUserGraduate,
+  FaTrophy,
+  FaCheckCircle,
+} from "react-icons/fa";
+
 import {
   BarChart,
   Bar,
@@ -17,46 +24,114 @@ const data = [
 
 function Dashboard() {
   return (
-    <div style={{ padding: "20px" }}>
-      {/* TITLE */}
-      <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>
+    <div style={{ marginTop: "25px" }}>
+      <h2
+        style={{
+          color: "#1e3a8a",
+          marginBottom: "20px",
+        }}
+      >
         📊 Dashboard Overview
-      </h1>
+      </h2>
 
-      {/* CARDS */}
+      {/* Dashboard Cards */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "repeat(4,1fr)",
           gap: "20px",
         }}
       >
-        <Card icon={<FaUsers />} title="Students" value="450" />
-        <Card icon={<FaChartLine />} title="Average CGPA" value="8.72" />
-        <Card icon={<FaUserGraduate />} title="Topper CGPA" value="9.91" />
-        <Card icon={<FaTrophy />} title="Above 9 CGPA" value="120" />
+        <Card
+          icon={<FaUsers />}
+          title="Total Students"
+          value="450"
+        />
+
+        <Card
+          icon={<FaChartLine />}
+          title="Average CGPA"
+          value="8.72"
+        />
+
+        <Card
+          icon={<FaUserGraduate />}
+          title="Top CGPA"
+          value="9.91"
+        />
+
+        <Card
+          icon={<FaTrophy />}
+          title="Above 9 CGPA"
+          value="120"
+        />
       </div>
 
-      {/* CHART */}
+      {/* Graph + Recent Activity */}
       <div
         style={{
-          marginTop: "40px",
-          background: "white",
-          padding: "20px",
-          borderRadius: "12px",
-          boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+          display: "grid",
+          gridTemplateColumns: "2fr 1fr",
+          gap: "20px",
+          marginTop: "35px",
         }}
       >
-        <h2>Semester Performance</h2>
+        {/* Chart */}
 
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="cgpa" fill="#1e3a8a" />
-          </BarChart>
-        </ResponsiveContainer>
+        <div
+          style={{
+            background: "white",
+            padding: "25px",
+            borderRadius: "15px",
+            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h3
+            style={{
+              color: "#1e3a8a",
+              marginBottom: "20px",
+            }}
+          >
+            Semester Performance
+          </h3>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="cgpa" fill="#1e3a8a" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Recent Activity */}
+
+        <div
+          style={{
+            background: "white",
+            padding: "25px",
+            borderRadius: "15px",
+            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h3
+            style={{
+              color: "#1e3a8a",
+              marginBottom: "20px",
+            }}
+          >
+            Recent Activity
+          </h3>
+
+          <Activity text="Semester 3 Result Uploaded" />
+
+          <Activity text="450 Students Processed" />
+
+          <Activity text="Average CGPA Updated" />
+
+          <Activity text="Reports Ready" />
+        </div>
       </div>
     </div>
   );
@@ -68,20 +143,47 @@ function Card({ icon, title, value }) {
       style={{
         background: "#1e3a8a",
         color: "white",
-        padding: "20px",
-        borderRadius: "12px",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
       }}
     >
-      <div style={{ fontSize: "30px" }}>{icon}</div>
+      <div
+        style={{
+          fontSize: "30px",
+        }}
+      >
+        {icon}
+      </div>
 
-      <h3 style={{ marginTop: "15px", marginBottom: "10px" }}>
+      <h3
+        style={{
+          marginTop: "18px",
+          marginBottom: "10px",
+        }}
+      >
         {title}
       </h3>
 
-      <h1 style={{ margin: 0 }}>
-        {value}
-      </h1>
+      <h1>{value}</h1>
+    </div>
+  );
+}
+
+function Activity({ text }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        marginBottom: "18px",
+        color: "#444",
+      }}
+    >
+      <FaCheckCircle color="green" />
+
+      <span>{text}</span>
     </div>
   );
 }
