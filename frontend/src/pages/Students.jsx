@@ -1,83 +1,165 @@
-import { Link } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Paper,
+  Typography,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  Box,
+} from "@mui/material";
+
+const studentsData = [
+  {
+    regNo: "921723104001",
+    name: "Aisha",
+    batch: "2023-2027",
+    cgpa: "9.12",
+  },
+  {
+    regNo: "921723104002",
+    name: "Rahul",
+    batch: "2023-2027",
+    cgpa: "8.87",
+  },
+  {
+    regNo: "921723104003",
+    name: "Priya",
+    batch: "2023-2027",
+    cgpa: "9.44",
+  },
+  {
+    regNo: "921723104004",
+    name: "Arun",
+    batch: "2023-2027",
+    cgpa: "8.66",
+  },
+];
 
 function Students() {
-  return (
-    <MainLayout>
-      <div style={{ padding: "30px" }}>
-        <h1>Students</h1>
+  const navigate = useNavigate();
 
-        <table
-          border="1"
-          cellPadding="10"
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "20px",
+  const [search, setSearch] = useState("");
+
+  const filteredStudents = studentsData.filter(
+    (student) =>
+      student.name.toLowerCase().includes(search.toLowerCase()) ||
+      student.regNo.includes(search)
+  );
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <Typography
+        variant="h4"
+        sx={{
+          color: "#1e3a8a",
+          fontWeight: "bold",
+          mb: 3,
+        }}
+      >
+        👨‍🎓 Students
+      </Typography>
+
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+            flexWrap: "wrap",
+            gap: 2,
           }}
         >
-          <thead>
-            <tr>
-              <th>Register No</th>
-              <th>Name</th>
-              <th>Section</th>
-              <th>CGPA</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+          <TextField
+            label="Search Student"
+            placeholder="Enter Register No or Name"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ width: 350 }}
+          />
 
-          <tbody>
-            <tr>
-              <td>921724113001</td>
-              <td>Aisha</td>
-              <td>A</td>
-              <td>9.15</td>
-              <td>
-                <Link to="/student/101">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
+          <Typography
+            sx={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: "#1e3a8a",
+            }}
+          >
+            Total Students : {filteredStudents.length}
+          </Typography>
+        </Box>
 
-            <tr>
-              <td>921724113002</td>
-              <td>Rahul</td>
-              <td>A</td>
-              <td>8.92</td>
-              <td>
-                <Link to="/student/102">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ background: "#1e3a8a" }}>
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  Register No
+                </TableCell>
 
-            <tr>
-              <td>921724113003</td>
-              <td>Priya</td>
-              <td>A</td>
-              <td>9.41</td>
-              <td>
-                <Link to="/student/103">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  Student Name
+                </TableCell>
 
-            <tr>
-              <td>921724113004</td>
-              <td>Arun</td>
-              <td>A</td>
-              <td>8.80</td>
-              <td>
-                <Link to="/student/104">
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </MainLayout>
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  Batch
+                </TableCell>
+
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  CGPA
+                </TableCell>
+
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  Action
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {filteredStudents.map((student) => (
+                <TableRow key={student.regNo} hover>
+                  <TableCell>{student.regNo}</TableCell>
+
+                  <TableCell>{student.name}</TableCell>
+
+                  <TableCell>{student.batch}</TableCell>
+
+                  <TableCell>{student.cgpa}</TableCell>
+
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        background: "#1e3a8a",
+                      }}
+                      onClick={() =>
+                        navigate("/student-details", {
+                          state: student,
+                        })
+                      }
+                    >
+                      VIEW
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </div>
   );
 }
 
