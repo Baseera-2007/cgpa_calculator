@@ -1,123 +1,301 @@
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import { useLocation } from "react-router-dom";
+import {
+  Paper,
+  Typography,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  Box,
+} from "@mui/material";
+
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 function StudentDetails() {
+  const { state } = useLocation();
+
+  const student = state || {
+    regNo: "921723104001",
+    name: "Aisha",
+    batch: "2023-2027",
+    cgpa: "9.12",
+  };
+
   return (
-    <>
-      <Navbar />
+    <div style={{ padding: "20px" }}>
+      {/* Page Title */}
+      <Typography
+        variant="h4"
+        sx={{
+          color: "#1e3a8a",
+          fontWeight: "bold",
+          mb: 3,
+        }}
+      >
+        👨‍🎓 Student Academic Profile
+      </Typography>
 
-      <div style={{ display: "flex" }}>
-        <Sidebar />
-
-        <div
-          style={{
-            flex: 1,
-            padding: "30px",
-            background: "#f5f7fb",
-            minHeight: "100vh",
+      {/* Student Information */}
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          mb: 3,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#1e3a8a",
+            fontWeight: "bold",
+            mb: 3,
           }}
         >
-          <h1 style={{ color: "#1e3a8a" }}>
-            👨‍🎓 Student Academic Profile
-          </h1>
+          Student Information
+        </Typography>
 
-          <div
-            style={{
-              background: "white",
-              padding: "25px",
-              borderRadius: "12px",
-              marginTop: "20px",
-              boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h2>Personal Information</h2>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Typography>
+              <b>Name :</b> {student.name}
+            </Typography>
+          </Grid>
 
-            <hr />
+          <Grid item xs={12} md={6}>
+            <Typography>
+              <b>Register Number :</b> {student.regNo}
+            </Typography>
+          </Grid>
 
-            <p><b>Name:</b> Baseera Banu S</p>
+          <Grid item xs={12} md={6}>
+            <Typography>
+              <b>Department :</b> CSBS
+            </Typography>
+          </Grid>
 
-            <p><b>Register Number:</b> 921724113006</p>
+          <Grid item xs={12} md={6}>
+            <Typography>
+              <b>Batch :</b> {student.batch}
+            </Typography>
+          </Grid>
 
-            <p><b>Department:</b> CSBS</p>
+          <Grid item xs={12} md={6}>
+            <Typography>
+              <b>Section :</b> A
+            </Typography>
+          </Grid>
 
-            <p><b>Batch:</b> 2024-2028</p>
+          <Grid item xs={12} md={6}>
+            <Typography>
+              <b>Current CGPA :</b> {student.cgpa}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
 
-            <p><b>Section:</b> A</p>
+      {/* Academic Summary */}
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          mb: 3,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#1e3a8a",
+            fontWeight: "bold",
+            mb: 3,
+          }}
+        >
+          Academic Summary
+        </Typography>
 
-            <p><b>Current Semester:</b> Semester 4</p>
-
-            <p><b>Current CGPA:</b> 8.95</p>
-          </div>
-
-          <div
-            style={{
-              background: "white",
-              padding: "25px",
-              borderRadius: "12px",
-              marginTop: "25px",
-              boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h2>Semester Results</h2>
-
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                marginTop: "20px",
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4}>
+            <Box
+              sx={{
+                background: "#f5f7fb",
+                p: 3,
+                borderRadius: 2,
+                textAlign: "center",
               }}
             >
-              <thead
-                style={{
-                  background: "#1e3a8a",
-                  color: "white",
+              <Typography variant="h6">Highest SGPA</Typography>
+
+              <Typography
+                variant="h4"
+                sx={{
+                  color: "#1e3a8a",
+                  fontWeight: "bold",
                 }}
               >
-                <tr>
-                  <th style={{ padding: "12px" }}>Semester</th>
-                  <th>SGPA</th>
-                  <th>Result PDF</th>
-                </tr>
-              </thead>
+                9.12
+              </Typography>
+            </Box>
+          </Grid>
 
-              <tbody>
-                <tr>
-                  <td style={{ padding: "12px" }}>Semester 1</td>
-                  <td>9.12</td>
-                  <td>
-                    <button>View PDF</button>
-                  </td>
-                </tr>
+          <Grid item xs={12} md={4}>
+            <Box
+              sx={{
+                background: "#f5f7fb",
+                p: 3,
+                borderRadius: 2,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="h6">Lowest SGPA</Typography>
 
-                <tr>
-                  <td style={{ padding: "12px" }}>Semester 2</td>
-                  <td>8.94</td>
-                  <td>
-                    <button>View PDF</button>
-                  </td>
-                </tr>
+              <Typography
+                variant="h4"
+                sx={{
+                  color: "#1e3a8a",
+                  fontWeight: "bold",
+                }}
+              >
+                8.80
+              </Typography>
+            </Box>
+          </Grid>
 
-                <tr>
-                  <td style={{ padding: "12px" }}>Semester 3</td>
-                  <td>8.80</td>
-                  <td>
-                    <button>View PDF</button>
-                  </td>
-                </tr>
+          <Grid item xs={12} md={4}>
+            <Box
+              sx={{
+                background: "#f5f7fb",
+                p: 3,
+                borderRadius: 2,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="h6">Current CGPA</Typography>
 
-                <tr>
-                  <td style={{ padding: "12px" }}>Semester 4</td>
-                  <td>8.95</td>
-                  <td>
-                    <button>View PDF</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </>
+              <Typography
+                variant="h4"
+                sx={{
+                  color: "#1e3a8a",
+                  fontWeight: "bold",
+                }}
+              >
+                {student.cgpa}
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {/* Semester Results */}
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#1e3a8a",
+            fontWeight: "bold",
+            mb: 3,
+          }}
+        >
+          Semester-wise Performance
+        </Typography>
+
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ background: "#1e3a8a" }}>
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  Semester
+                </TableCell>
+
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  SGPA
+                </TableCell>
+
+                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                  Result PDF
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              <TableRow>
+                <TableCell>Semester 1</TableCell>
+                <TableCell>9.12</TableCell>
+                <TableCell>
+                  <Button startIcon={<PictureAsPdfIcon />} variant="outlined">
+                    View PDF
+                  </Button>
+                </TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 2</TableCell>
+                <TableCell>8.94</TableCell>
+                <TableCell>
+                  <Button startIcon={<PictureAsPdfIcon />} variant="outlined">
+                    View PDF
+                  </Button>
+                </TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 3</TableCell>
+                <TableCell>8.80</TableCell>
+                <TableCell>
+                  <Button startIcon={<PictureAsPdfIcon />} variant="outlined">
+                    View PDF
+                  </Button>
+                </TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 4</TableCell>
+                <TableCell>8.95</TableCell>
+                <TableCell>
+                  <Button startIcon={<PictureAsPdfIcon />} variant="outlined">
+                    View PDF
+                  </Button>
+                </TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 5</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>Not Uploaded</TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 6</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>Not Uploaded</TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 7</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>Not Uploaded</TableCell>
+              </TableRow>
+
+              <TableRow>
+                <TableCell>Semester 8</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>Not Uploaded</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </div>
   );
 }
 
