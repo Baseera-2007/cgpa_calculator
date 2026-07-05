@@ -2,26 +2,43 @@ import { NavLink } from "react-router-dom";
 import "../styles/Sidebar.css";
 
 function Sidebar() {
+
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+
   return (
     <aside className="sidebar">
       <ul>
-        <li>
-          <NavLink to="/">🏠 Dashboard</NavLink>
-        </li>
 
-        <li>
-          <NavLink to="/students">👨‍🎓 Students</NavLink>
-        </li>
+        {role === "staff" ? (
+          <>
+            <li>
+              <NavLink to="/staff">🏠 Dashboard</NavLink>
+            </li>
 
-        <li>
-          <NavLink to="/reports">📄 Reports</NavLink>
-        </li>
+            <li>
+              <NavLink to="/staff/students">👨‍🎓 Students</NavLink>
+            </li>
 
-        <li>
-          <NavLink to="/upload-results">📤 Upload Results</NavLink>
-        </li>
+            <li>
+              <NavLink to="/staff/reports">📄 Reports</NavLink>
+            </li>
 
-        
+            <li>
+              <NavLink to="/staff/upload-results">📤 Upload Results</NavLink>
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              <NavLink to="/student">📤 Upload Results</NavLink>
+            </li>
+
+            <li>
+              <NavLink to="/student/profile">👤 My Profile</NavLink>
+            </li>
+          </>
+        )}
+
       </ul>
     </aside>
   );

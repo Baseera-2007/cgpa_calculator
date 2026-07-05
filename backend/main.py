@@ -6,7 +6,7 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
-from models import Student, SemesterResult, Subject
+from models import User, Student, SemesterResult, Subject
 from cgpa import (
     get_grade_point,
     get_credit,
@@ -46,7 +46,85 @@ class StudentUpdate(BaseModel):
     batch: str
     section: str
 
+class SignupRequest(BaseModel):
+    username: str
+    email: str
+    register_number: str
+    department: str
+    password: str
+    role: str = "student"
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# ---------------------------------------
+# Signup API
+# ---------------------------------------
+@app.post("/signup")
+def signup(user: SignupRequest):
+
+    db = SessionLocal()
+
+    existing_user = db.query(User).filter(
+        User.register_number == user.register_number
+    ).first()
+
+    if existing_user:
+        db.close()
+        raise HTTPException(
+            status_code=400,
+            detail="User already exists."
+        )
+
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        register_number=user.register_number,
+        department=user.department,
+        password=user.password,
+        role=user.role
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    db.close()
+
+    return {
+        "message": "Signup Successful"
+    }
+
+# ---------------------------------------
+# Login API
+# ---------------------------------------
+@app.post("/login")
+def login(user: LoginRequest):
+
+    db = SessionLocal()
+
+    existing_user = db.query(User).filter(
+        User.username == user.username,
+        User.password == user.password
+    ).first()
+
+    if not existing_user:
+        db.close()
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Username or Password"
+        )
+
+    db.close()
+
+    return {
+        "message": "Login Successful",
+        "username": existing_user.username,
+        "role": existing_user.role,
+        "register_number": existing_user.register_number
+    }
+
+    
 # ---------------------------------------
 # Upload PDF
 # ---------------------------------------

@@ -60,7 +60,8 @@ function UploadResult() {
 
       alert("Result Uploaded Successfully!");
 
-      navigate("/students");
+// Student profile-ku redirect
+navigate("/student/profile");
 
     } catch (error) {
       console.error(error);

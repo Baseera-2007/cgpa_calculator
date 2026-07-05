@@ -1,6 +1,9 @@
 import "../styles/Navbar.css";
 
 function Navbar() {
+
+  const username = localStorage.getItem("username");
+
   return (
     <nav className="navbar">
       <div className="navbar-left">
@@ -8,7 +11,9 @@ function Navbar() {
       </div>
 
       <div className="navbar-right">
-        <span>Welcome, Admin 👋</span>
+        <span>
+          Welcome, {username} 👋
+        </span>
       </div>
     </nav>
   );
