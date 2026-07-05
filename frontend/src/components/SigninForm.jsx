@@ -18,6 +18,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function SigninForm() {
+
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -35,16 +36,50 @@ function SigninForm() {
     });
   };
 
-  const handleSignin = (e) => {
+  const handleSignin = async (e) => {
+
     e.preventDefault();
 
-    // Backend Login API will be connected later
+    try {
 
-    if (formData.role === "staff") {
-      navigate("/staff");
-    } else {
-      navigate("/student");
+      const response = await fetch(
+        "http://127.0.0.1:8000/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            password: formData.password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.detail);
+        return;
+      }
+
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("register_number", data.register_number);
+
+      alert("Login Successful 🎉");
+
+      if (data.role === "staff") {
+        navigate("/staff");
+      } else {
+        navigate("/student/profile");
+      }
+
+    } catch (err) {
+      console.log(err);
+      alert("Server Error");
     }
+
   };
 
   return (

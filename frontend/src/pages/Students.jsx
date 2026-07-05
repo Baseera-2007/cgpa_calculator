@@ -1,165 +1,150 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Paper,
   Typography,
-  TextField,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Chip,
+  Button,
   Box,
 } from "@mui/material";
-
-import StudentTable from "../components/StudentTable";
-import StudentDialog from "../components/StudentDialog";
-import EditDialog from "../components/EditDialog";
-import DeleteDialog from "../components/DeleteDialog";
+import PersonIcon from "@mui/icons-material/Person";
+import SchoolIcon from "@mui/icons-material/School";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 function Students() {
   const [students, setStudents] = useState([]);
-  const [search, setSearch] = useState("");
 
-  const [selectedStudent, setSelectedStudent] = useState(null);
-
-  const [openView, setOpenView] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+  const loadStudents = async () => {
+    const res = await fetch("http://127.0.0.1:8000/students");
+    const data = await res.json();
+    setStudents(data);
+  };
 
   useEffect(() => {
     loadStudents();
   }, []);
 
-  const loadStudents = async () => {
-    try {
-      const response = await fetch("http://127.0.0.1:8000/students");
-      const data = await response.json();
-      setStudents(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const filteredStudents = students.filter(
-    (student) =>
-      student.student_name
-        ?.toLowerCase()
-        .includes(search.toLowerCase()) ||
-      student.register_number?.includes(search)
-  );
-
-  // VIEW
-  const handleView = (student) => {
-    setSelectedStudent(student);
-    setOpenView(true);
-  };
-
-  // EDIT
-  const handleEdit = (student) => {
-    setSelectedStudent(student);
-    setOpenEdit(true);
-  };
-
-  const handleSave = async (updatedStudent) => {
-    await fetch(`http://127.0.0.1:8000/student/${updatedStudent.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedStudent),
-    });
-
-    setOpenEdit(false);
-    loadStudents();
-  };
-
-  // DELETE
-  const handleDeleteClick = (student) => {
-    setSelectedStudent(student);
-    setOpenDelete(true);
-  };
-
-  const handleDelete = async (student) => {
-    await fetch(`http://127.0.0.1:8000/student/${student.id}`, {
-      method: "DELETE",
-    });
-
-    setOpenDelete(false);
-    loadStudents();
-  };
-
   return (
-    <div style={{ padding: "20px" }}>
+    <Box sx={{ p: 3 }}>
       <Typography
         variant="h4"
-        sx={{
-          color: "#1e3a8a",
-          fontWeight: "bold",
-          mb: 3,
-        }}
+        fontWeight="bold"
+        color="#1e3a8a"
+        mb={4}
       >
-        👨‍🎓 Students
+        Student Records
       </Typography>
 
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          borderRadius: 3,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-            flexWrap: "wrap",
-            gap: 2,
-          }}
-        >
-          <TextField
-            label="Search Student"
-            placeholder="Register No or Name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{ width: 350 }}
-          />
+      <Grid container spacing={3}>
+        {students.map((student) => (
+          <Grid item xs={12} md={6} lg={4} key={student.id}>
+            <Card
+              elevation={6}
+              sx={{
+                borderRadius: 4,
+                transition: "0.3s",
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                },
+              }}
+            >
+              <CardContent>
 
-          <Typography
-            sx={{
-              fontWeight: "bold",
-              color: "#1e3a8a",
-            }}
-          >
-            Total Students : {filteredStudents.length}
-          </Typography>
-        </Box>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  mb={2}
+                >
+                  <Avatar
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      bgcolor: "#1e3a8a",
+                    }}
+                  >
+                    <PersonIcon sx={{ fontSize: 45 }} />
+                  </Avatar>
+                </Box>
 
-        <StudentTable
-          students={filteredStudents}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
-        />
-      </Paper>
+                <Typography
+                  align="center"
+                  fontWeight="bold"
+                  fontSize={22}
+                >
+                  {student.student_name}
+                </Typography>
 
-      <StudentDialog
-        open={openView}
-        onClose={() => setOpenView(false)}
-        student={selectedStudent}
-        refreshStudents={loadStudents}
-      />
+                <Typography
+                  align="center"
+                  color="gray"
+                  mb={2}
+                >
+                  {student.register_number}
+                </Typography>
 
-      <EditDialog
-        open={openEdit}
-        onClose={() => setOpenEdit(false)}
-        student={selectedStudent}
-        onSave={handleSave}
-      />
+                <Chip
+                  icon={<SchoolIcon />}
+                  label={student.department}
+                  color="primary"
+                  sx={{ mb: 1 }}
+                />
 
-      <DeleteDialog
-        open={openDelete}
-        onClose={() => setOpenDelete(false)}
-        student={selectedStudent}
-        onDelete={handleDelete}
-      />
-    </div>
+                <Typography mt={2}>
+                  <b>Batch :</b> {student.batch}
+                </Typography>
+
+                <Typography>
+                  <b>Section :</b> {student.section}
+                </Typography>
+
+                <Typography>
+                  <b>Semester :</b> {student.current_semester}
+                </Typography>
+
+                <Typography
+                  fontWeight="bold"
+                  color="green"
+                  mt={1}
+                >
+                  CGPA : {student.current_cgpa}
+                </Typography>
+
+                <Box
+                  display="flex"
+                  gap={2}
+                  mt={3}
+                >
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    sx={{
+                      bgcolor: "#1976d2",
+                    }}
+                  >
+                    Edit
+                  </Button>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                  >
+                    Delete
+                  </Button>
+                </Box>
+
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 }
 

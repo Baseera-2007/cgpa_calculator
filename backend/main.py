@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import shutil
@@ -129,7 +129,11 @@ def login(user: LoginRequest):
 # Upload PDF
 # ---------------------------------------
 @app.post("/upload-pdf")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(
+    file: UploadFile = File(...),
+    batch: str = Form(...),
+    semester: str = Form(...)
+):
 
     os.makedirs("uploads", exist_ok=True)
 
@@ -169,13 +173,17 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     if not student:
 
+        user = db.query(User).filter(
+            User.register_number == data["register_number"]
+        ).first()
+
         student = Student(
             register_number=data["register_number"],
             student_name=data["student_name"],
-            department=data["department"],
-            batch="2023-2027",
-            section="A",
-            current_semester=int(data["semester"]),
+            department=user.department if user else data["department"],
+            batch=batch,
+            section=user.section if user else "A",
+            current_semester=int(semester),
             current_cgpa=sgpa
         )
 
@@ -197,22 +205,23 @@ async def upload_pdf(file: UploadFile = File(...)):
             detail="Semester already uploaded."
         )
 
-    semester = SemesterResult(
+    semester_result = SemesterResult(
         student_id=student.id,
-        semester=int(data["semester"]),
+        semester=int(semester),
         sgpa=sgpa,
         result_pdf=file.filename
     )
 
-    db.add(semester)
+
+    db.add(semester_result)
     db.commit()
-    db.refresh(semester)
+    db.refresh(semester_result)
 
     for subject in data["subjects"]:
 
         db.add(
             Subject(
-                semester_result_id=semester.id,
+                semester_result_id=semester_result.id,
                 subject_code=subject["code"],
                 subject_name=subject["name"],
                 grade=subject["grade"],

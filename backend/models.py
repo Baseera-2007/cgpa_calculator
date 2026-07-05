@@ -18,7 +18,7 @@ class User(Base):
     password = Column(String, nullable=False)
 
     role = Column(String, default="student")
-    
+
 class Student(Base):
     __tablename__ = "students"
 

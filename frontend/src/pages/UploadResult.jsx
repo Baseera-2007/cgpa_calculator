@@ -40,7 +40,10 @@ function UploadResult() {
       setLoading(true);
 
       const formData = new FormData();
+
       formData.append("file", selectedFile);
+      formData.append("batch", batch);
+      formData.append("semester", semester);
 
       const response = await fetch(
         "http://127.0.0.1:8000/upload-pdf",

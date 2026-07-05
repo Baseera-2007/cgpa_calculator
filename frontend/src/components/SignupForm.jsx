@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import {
   Paper,
   Typography,
   TextField,
   Button,
   Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 function SignupForm() {
@@ -19,6 +24,7 @@ function SignupForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "student",
   });
 
   const handleChange = (e) => {
@@ -29,44 +35,39 @@ function SignupForm() {
   };
 
   const handleSignup = async (e) => {
+
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      alert("Passwords do not match");
       return;
     }
 
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: formData.username,
-            department: formData.department,
-            register_number: formData.registerNumber,
-            email: formData.email,
-            password: formData.password,
-            role: "student",
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Signup Successful 🎉");
-        navigate("/");
-      } else {
-        alert(data.detail);
+    const response = await fetch(
+      "http://127.0.0.1:8000/signup",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          department: formData.department,
+          register_number: formData.registerNumber,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
       }
+    );
 
-    } catch (error) {
-      console.log(error);
-      alert("Server Error");
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Signup Successful");
+      navigate("/");
+    } else {
+      alert(data.detail);
     }
   };
 
@@ -111,6 +112,20 @@ function SignupForm() {
           onChange={handleChange}
         />
 
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Role</InputLabel>
+
+          <Select
+            name="role"
+            value={formData.role}
+            label="Role"
+            onChange={handleChange}
+          >
+            <MenuItem value="student">Student</MenuItem>
+            <MenuItem value="staff">Staff</MenuItem>
+          </Select>
+        </FormControl>
+
         <TextField
           fullWidth
           label="Register Number"
@@ -123,8 +138,8 @@ function SignupForm() {
         <TextField
           fullWidth
           label="Email"
-          name="email"
           type="email"
+          name="email"
           margin="normal"
           value={formData.email}
           onChange={handleChange}
@@ -132,9 +147,9 @@ function SignupForm() {
 
         <TextField
           fullWidth
-          label="Create Password"
-          name="password"
+          label="Password"
           type="password"
+          name="password"
           margin="normal"
           value={formData.password}
           onChange={handleChange}
@@ -143,42 +158,28 @@ function SignupForm() {
         <TextField
           fullWidth
           label="Confirm Password"
-          name="confirmPassword"
           type="password"
+          name="confirmPassword"
           margin="normal"
           value={formData.confirmPassword}
           onChange={handleChange}
         />
 
         <Button
-          type="submit"
           fullWidth
           variant="contained"
+          type="submit"
           sx={{
             mt: 3,
             py: 1.5,
-            background: "#1e3a8a",
-            fontWeight: "bold",
           }}
         >
           Sign Up
         </Button>
 
-        <Typography
-          align="center"
-          sx={{ mt: 3 }}
-        >
+        <Typography align="center" sx={{ mt: 3 }}>
           Already have an account?{" "}
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-              color: "#1e3a8a",
-              fontWeight: "bold",
-            }}
-          >
-            Sign In
-          </Link>
+          <Link to="/">Sign In</Link>
         </Typography>
 
       </Box>

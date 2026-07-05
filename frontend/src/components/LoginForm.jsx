@@ -41,9 +41,21 @@ function LoginForm() {
         return;
       }
 
+      console.log(data);
+
+      // Save Login Details
       localStorage.setItem("username", data.username);
       localStorage.setItem("role", data.role);
-      localStorage.setItem("register_number", data.register_number);
+      localStorage.setItem(
+        "register_number",
+        data.register_number
+      );
+
+      // Check immediately
+      console.log(
+        "Saved Register Number :",
+        localStorage.getItem("register_number")
+      );
 
       alert("Login Successful 🎉");
 
@@ -107,8 +119,6 @@ function LoginForm() {
             mt: 3,
             py: 1.5,
             background: "#1e3a8a",
-            fontWeight: "bold",
-            fontSize: "16px",
           }}
         >
           Sign In
@@ -119,14 +129,7 @@ function LoginForm() {
           sx={{ mt: 3 }}
         >
           Don't have an account?{" "}
-          <Link
-            to="/signup"
-            style={{
-              textDecoration: "none",
-              color: "#1e3a8a",
-              fontWeight: "bold",
-            }}
-          >
+          <Link to="/signup">
             Sign Up
           </Link>
         </Typography>

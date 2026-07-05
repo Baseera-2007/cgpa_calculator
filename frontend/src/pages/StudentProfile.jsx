@@ -3,8 +3,15 @@ import {
   Paper,
   Typography,
   Grid,
-  Divider,
+  Box,
+  Avatar,
+  Chip,
 } from "@mui/material";
+
+import PersonIcon from "@mui/icons-material/Person";
+import SchoolIcon from "@mui/icons-material/School";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 function StudentProfile() {
 
@@ -44,107 +51,168 @@ function StudentProfile() {
   }
 
   return (
+  <Box sx={{ p: 3 }}>
+    {/* Profile Card */}
     <Paper
+      elevation={5}
       sx={{
         p: 4,
-        borderRadius: 3,
+        borderRadius: 4,
+        background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
+        color: "#fff",
+        mb: 4,
+      }}
+    >
+      <Grid container spacing={3} alignItems="center">
+        <Grid item xs={12} md={2}>
+          <Avatar
+            sx={{
+              width: 100,
+              height: 100,
+              bgcolor: "#fff",
+              color: "#1e3a8a",
+              fontSize: 45,
+              mx: "auto",
+            }}
+          >
+            <PersonIcon fontSize="large" />
+          </Avatar>
+        </Grid>
+
+        <Grid item xs={12} md={7}>
+          <Typography variant="h4" fontWeight="bold">
+            {student.student_name}
+          </Typography>
+
+          <Typography sx={{ mt: 1 }}>
+            Register No : {student.register_number}
+          </Typography>
+
+          <Typography>
+            Department : {student.department}
+          </Typography>
+
+          <Typography>
+            Batch : {student.batch}
+          </Typography>
+
+          <Typography>
+            Section : {student.section}
+          </Typography>
+
+          <Typography>
+            Current Semester : Semester {student.current_semester}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <Paper
+            sx={{
+              p: 3,
+              textAlign: "center",
+              borderRadius: 3,
+              bgcolor: "#fff",
+            }}
+          >
+            <WorkspacePremiumIcon
+              sx={{
+                color: "#FFD700",
+                fontSize: 50,
+              }}
+            />
+
+            <Typography
+              sx={{
+                color: "#444",
+                mt: 1,
+              }}
+            >
+              Current CGPA
+            </Typography>
+
+            <Typography
+              variant="h3"
+              fontWeight="bold"
+              color="green"
+            >
+              {student.current_cgpa}
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Paper>
+
+    {/* Semester Results */}
+    <Paper
+      elevation={4}
+      sx={{
+        p: 4,
+        borderRadius: 4,
       }}
     >
       <Typography
-        variant="h4"
-        sx={{
-          mb: 3,
-          color: "#1e3a8a",
-          fontWeight: "bold",
-        }}
-      >
-        My Profile
-      </Typography>
-
-      <Grid container spacing={2}>
-
-        <Grid item xs={6}>
-          <Typography><b>Name :</b> {student.student_name}</Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography><b>Register No :</b> {student.register_number}</Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography><b>Department :</b> {student.department}</Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography><b>Batch :</b> {student.batch}</Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography><b>Section :</b> {student.section}</Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography><b>Current Semester :</b> {student.current_semester}</Typography>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Typography
-            sx={{
-              fontSize: 24,
-              color: "green",
-              fontWeight: "bold",
-            }}
-          >
-            CGPA : {student.current_cgpa}
-          </Typography>
-        </Grid>
-
-      </Grid>
-
-      <Divider sx={{ my: 4 }} />
-
-      <Typography
         variant="h5"
-        sx={{
-          mb: 2,
-          color: "#1e3a8a",
-          fontWeight: "bold",
-        }}
+        fontWeight="bold"
+        color="#1e3a8a"
+        mb={3}
       >
-        Semester Results
+        <SchoolIcon sx={{ mr: 1 }} />
+        Semester Performance
       </Typography>
 
-      {student.semester_results.map((sem) => (
-        <Paper
-          key={sem.semester}
-          sx={{
-            p: 2,
-            mb: 3,
-            background: "#f8fafc",
-          }}
-        >
-          <Typography variant="h6">
-            Semester {sem.semester}
-          </Typography>
+      {[1,2,3,4,5,6,7,8].map((semester)=>{
 
-          <Typography
+        const result = student.semester_results.find(
+          (sem)=>sem.semester===semester
+        );
+
+        return(
+          <Paper
+            key={semester}
+            elevation={2}
             sx={{
-              mb: 2,
+              p:2,
+              mb:2,
+              borderRadius:3,
+              display:"flex",
+              justifyContent:"space-between",
+              alignItems:"center",
+              transition:"0.3s",
+              "&:hover":{
+                transform:"scale(1.01)",
+              }
             }}
           >
-            SGPA : {sem.sgpa}
-          </Typography>
+            <Box sx={{display:"flex",alignItems:"center",gap:2}}>
+              <AssignmentTurnedInIcon
+                color={result ? "success":"disabled"}
+              />
 
-          {sem.subjects.map((sub) => (
-            <Typography key={sub.subject_code}>
-              {sub.subject_code} - {sub.subject_name} ({sub.grade})
-            </Typography>
-          ))}
-        </Paper>
-      ))}
+              <Typography fontWeight="bold">
+                Semester {semester}
+              </Typography>
+            </Box>
+
+            {result ? (
+              <Chip
+                label={`SGPA : ${result.sgpa}`}
+                color="success"
+              />
+            ) : (
+              <Chip
+                label="Not Uploaded"
+                color="default"
+              />
+            )}
+
+          </Paper>
+        );
+
+      })}
 
     </Paper>
-  );
+  </Box>
+);
 }
 
 export default StudentProfile;
