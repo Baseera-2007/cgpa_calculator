@@ -1,56 +1,87 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   Paper,
   Typography,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
   Box,
 } from "@mui/material";
 
-const studentsData = [
-  {
-    regNo: "921723104001",
-    name: "Aisha",
-    batch: "2023-2027",
-    cgpa: "9.12",
-  },
-  {
-    regNo: "921723104002",
-    name: "Rahul",
-    batch: "2023-2027",
-    cgpa: "8.87",
-  },
-  {
-    regNo: "921723104003",
-    name: "Priya",
-    batch: "2023-2027",
-    cgpa: "9.44",
-  },
-  {
-    regNo: "921723104004",
-    name: "Arun",
-    batch: "2023-2027",
-    cgpa: "8.66",
-  },
-];
+import StudentTable from "../components/StudentTable";
+import StudentDialog from "../components/StudentDialog";
+import EditDialog from "../components/EditDialog";
+import DeleteDialog from "../components/DeleteDialog";
 
 function Students() {
-  const navigate = useNavigate();
-
+  const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
 
-  const filteredStudents = studentsData.filter(
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
+  const [openView, setOpenView] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+
+  useEffect(() => {
+    loadStudents();
+  }, []);
+
+  const loadStudents = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/students");
+      const data = await response.json();
+      setStudents(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const filteredStudents = students.filter(
     (student) =>
-      student.name.toLowerCase().includes(search.toLowerCase()) ||
-      student.regNo.includes(search)
+      student.student_name
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
+      student.register_number?.includes(search)
   );
+
+  // VIEW
+  const handleView = (student) => {
+    setSelectedStudent(student);
+    setOpenView(true);
+  };
+
+  // EDIT
+  const handleEdit = (student) => {
+    setSelectedStudent(student);
+    setOpenEdit(true);
+  };
+
+  const handleSave = async (updatedStudent) => {
+    await fetch(`http://127.0.0.1:8000/student/${updatedStudent.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedStudent),
+    });
+
+    setOpenEdit(false);
+    loadStudents();
+  };
+
+  // DELETE
+  const handleDeleteClick = (student) => {
+    setSelectedStudent(student);
+    setOpenDelete(true);
+  };
+
+  const handleDelete = async (student) => {
+    await fetch(`http://127.0.0.1:8000/student/${student.id}`, {
+      method: "DELETE",
+    });
+
+    setOpenDelete(false);
+    loadStudents();
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -84,7 +115,7 @@ function Students() {
         >
           <TextField
             label="Search Student"
-            placeholder="Enter Register No or Name"
+            placeholder="Register No or Name"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{ width: 350 }}
@@ -92,7 +123,6 @@ function Students() {
 
           <Typography
             sx={{
-              fontSize: 18,
               fontWeight: "bold",
               color: "#1e3a8a",
             }}
@@ -101,64 +131,34 @@ function Students() {
           </Typography>
         </Box>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ background: "#1e3a8a" }}>
-                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                  Register No
-                </TableCell>
-
-                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                  Student Name
-                </TableCell>
-
-                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                  Batch
-                </TableCell>
-
-                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                  CGPA
-                </TableCell>
-
-                <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                  Action
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {filteredStudents.map((student) => (
-                <TableRow key={student.regNo} hover>
-                  <TableCell>{student.regNo}</TableCell>
-
-                  <TableCell>{student.name}</TableCell>
-
-                  <TableCell>{student.batch}</TableCell>
-
-                  <TableCell>{student.cgpa}</TableCell>
-
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        background: "#1e3a8a",
-                      }}
-                      onClick={() =>
-                        navigate("/student-details", {
-                          state: student,
-                        })
-                      }
-                    >
-                      VIEW
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <StudentTable
+          students={filteredStudents}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDeleteClick}
+        />
       </Paper>
+
+      <StudentDialog
+        open={openView}
+        onClose={() => setOpenView(false)}
+        student={selectedStudent}
+        refreshStudents={loadStudents}
+      />
+
+      <EditDialog
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        student={selectedStudent}
+        onSave={handleSave}
+      />
+
+      <DeleteDialog
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        student={selectedStudent}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

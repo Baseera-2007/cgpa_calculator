@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Paper,
   Typography,
@@ -8,6 +9,7 @@ import {
   MenuItem,
   Button,
   Box,
+  CircularProgress,
 } from "@mui/material";
 
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -15,9 +17,12 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 function UploadResult() {
+  const navigate = useNavigate();
+
   const [batch, setBatch] = useState("");
   const [semester, setSemester] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
@@ -25,18 +30,48 @@ function UploadResult() {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!batch || !semester || !selectedFile) {
       alert("Please select Batch, Semester and PDF.");
       return;
     }
 
-    alert("PDF uploaded successfully!");
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/upload-pdf",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.detail || "Upload Failed");
+        setLoading(false);
+        return;
+      }
+
+      alert("Result Uploaded Successfully!");
+
+      navigate("/students");
+
+    } catch (error) {
+      console.error(error);
+      alert("Cannot connect to backend.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ padding: "20px" }}>
-      {/* Title */}
       <Box
         sx={{
           display: "flex",
@@ -71,11 +106,10 @@ function UploadResult() {
         }}
       >
         Upload the official Anna University Result PDF. The system
-        automatically extracts student grades, calculates SGPA & CGPA and
-        prepares the data for database import.
+        automatically extracts student grades, calculates SGPA &
+        CGPA and stores them in PostgreSQL.
       </Typography>
 
-      {/* Main Card */}
       <Paper
         elevation={4}
         sx={{
@@ -83,7 +117,6 @@ function UploadResult() {
           borderRadius: 4,
         }}
       >
-        {/* Batch & Semester */}
         <Box
           sx={{
             display: "flex",
@@ -126,7 +159,6 @@ function UploadResult() {
           </FormControl>
         </Box>
 
-        {/* Upload Area */}
         <Paper
           variant="outlined"
           sx={{
@@ -148,7 +180,9 @@ function UploadResult() {
             Drag & Drop Result PDF Here
           </Typography>
 
-          <Typography sx={{ my: 2 }}>OR</Typography>
+          <Typography sx={{ my: 2 }}>
+            OR
+          </Typography>
 
           <Button
             variant="contained"
@@ -170,42 +204,52 @@ function UploadResult() {
           </Button>
 
           {selectedFile && (
-            <>
-              <Box
+            <Box
+              sx={{
+                mt: 4,
+                borderTop: "1px solid #ddd",
+                pt: 3,
+              }}
+            >
+              <Typography
                 sx={{
-                  mt: 4,
-                  borderTop: "1px solid #ddd",
-                  pt: 3,
+                  color: "green",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 1,
+                  fontWeight: "bold",
                 }}
               >
-                <Typography
-                  sx={{
-                    color: "green",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 1,
-                    fontWeight: "bold",
-                  }}
-                >
-                  <CheckCircleIcon />
-                  Selected File : {selectedFile.name}
-                </Typography>
+                <CheckCircleIcon />
+                Selected File : {selectedFile.name}
+              </Typography>
 
-                <Button
-                  variant="contained"
-                  color="success"
-                  sx={{
-                    mt: 3,
-                    px: 5,
-                    py: 1.5,
-                  }}
-                  onClick={handleUpload}
-                >
-                  Upload Result
-                </Button>
-              </Box>
-            </>
+              <Button
+                variant="contained"
+                color="success"
+                sx={{
+                  mt: 3,
+                  px: 5,
+                  py: 1.5,
+                }}
+                onClick={handleUpload}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <CircularProgress
+                      size={22}
+                      color="inherit"
+                      sx={{ mr: 1 }}
+                    />
+                    Uploading...
+                  </>
+                ) : (
+                  "Upload Result"
+                )}
+              </Button>
+            </Box>
           )}
         </Paper>
       </Paper>

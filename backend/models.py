@@ -13,9 +13,13 @@ class Student(Base):
     batch = Column(String)
     section = Column(String)
     current_semester = Column(Integer)
-    current_cgpa = Column(DECIMAL(4,2))
+    current_cgpa = Column(DECIMAL(4, 2))
 
-    semester_results = relationship("SemesterResult", back_populates="student")
+    semester_results = relationship(
+        "SemesterResult",
+        back_populates="student",
+        cascade="all, delete-orphan"
+    )
 
 
 class SemesterResult(Base):
@@ -24,11 +28,19 @@ class SemesterResult(Base):
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(Integer, ForeignKey("students.id"))
     semester = Column(Integer)
-    sgpa = Column(DECIMAL(4,2))
+    sgpa = Column(DECIMAL(4, 2))
     result_pdf = Column(String)
 
-    student = relationship("Student", back_populates="semester_results")
-    subjects = relationship("Subject", back_populates="semester_result")
+    student = relationship(
+        "Student",
+        back_populates="semester_results"
+    )
+
+    subjects = relationship(
+        "Subject",
+        back_populates="semester_result",
+        cascade="all, delete-orphan"
+    )
 
 
 class Subject(Base):
@@ -41,4 +53,8 @@ class Subject(Base):
     grade = Column(String)
     credit = Column(Integer)
     grade_point = Column(Integer)
-    semester_result = relationship("SemesterResult", back_populates="subjects")
+
+    semester_result = relationship(
+        "SemesterResult",
+        back_populates="subjects"
+    )

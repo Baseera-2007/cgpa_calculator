@@ -1,119 +1,84 @@
-import { useState } from "react";
-import "../styles/StudentTable.css";
-import AddStudentDialog from "./AddStudentDialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+} from "@mui/material";
 
-function StudentTable() {
-
-  const [open, setOpen] = useState(false);
-
-  const students = [
-    {
-      regNo: "23CSBS001",
-      name: "Aisha",
-      section: "A",
-      sgpa: 8.92,
-      cgpa: 9.15,
-    },
-    {
-      regNo: "23CSBS002",
-      name: "Rahul",
-      section: "A",
-      sgpa: 8.51,
-      cgpa: 8.72,
-    },
-    {
-      regNo: "23CSBS003",
-      name: "Priya",
-      section: "A",
-      sgpa: 9.42,
-      cgpa: 9.41,
-    },
-    {
-      regNo: "23CSBS004",
-      name: "Arun",
-      section: "B",
-      sgpa: 8.74,
-      cgpa: 8.96,
-    },
-  ];
-
+function StudentTable({ students, onView }) {
   return (
-    <div className="student-table-container">
+    <TableContainer>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ background: "#1e3a8a" }}>
+            <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              Register No
+            </TableCell>
 
-      <div className="student-header">
+            <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              Student Name
+            </TableCell>
 
-        <h2>Student Management</h2>
+            <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              Department
+            </TableCell>
 
-        <button
-          className="add-btn"
-          onClick={() => setOpen(true)}
-        >
-          + Add Student
-        </button>
+            <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              CGPA
+            </TableCell>
 
-      </div>
+            <TableCell
+              align="center"
+              sx={{ color: "white", fontWeight: "bold" }}
+            >
+              Action
+            </TableCell>
+          </TableRow>
+        </TableHead>
 
-      <input
-        type="text"
-        placeholder="🔍 Search Student..."
-        className="search-box"
-      />
+        <TableBody>
+          {students.length > 0 ? (
+            students.map((student) => (
+              <TableRow key={student.id} hover>
+                <TableCell>{student.register_number}</TableCell>
 
-      <table className="student-table">
+                <TableCell>{student.student_name}</TableCell>
 
-        <thead>
-          <tr>
-            <th>Register No</th>
-            <th>Student Name</th>
-            <th>Section</th>
-            <th>SGPA</th>
-            <th>CGPA</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+                <TableCell>
+                  {student.department?.includes(
+                    "COMPUTER SCIENCE AND BUSINESS SYSTEMS"
+                  )
+                    ? "CSBS"
+                    : student.department}
+                </TableCell>
 
-        <tbody>
+                <TableCell>{student.current_cgpa}</TableCell>
 
-          {students.map((student) => (
-
-            <tr key={student.regNo}>
-
-              <td>{student.regNo}</td>
-
-              <td>{student.name}</td>
-
-              <td>{student.section}</td>
-
-              <td>{student.sgpa}</td>
-
-              <td>{student.cgpa}</td>
-
-              <td>
-
-                <button className="edit-btn">
-                  Edit
-                </button>
-
-                <button className="delete-btn">
-                  Delete
-                </button>
-
-              </td>
-
-            </tr>
-
-          ))}
-
-        </tbody>
-
-      </table>
-
-      <AddStudentDialog
-        open={open}
-        handleClose={() => setOpen(false)}
-      />
-
-    </div>
+                <TableCell align="center">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => onView(student)}
+                  >
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} align="center">
+                No Students Found
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 

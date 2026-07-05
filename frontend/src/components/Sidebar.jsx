@@ -21,9 +21,7 @@ function Sidebar() {
           <NavLink to="/upload-results">📤 Upload Results</NavLink>
         </li>
 
-        <li>
-          <NavLink to="/settings">⚙️ Settings</NavLink>
-        </li>
+        
       </ul>
     </aside>
   );
