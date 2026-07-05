@@ -1,151 +1,459 @@
 import { useEffect, useState } from "react";
+
 import {
   Paper,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  Avatar,
-  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Button,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
   Box,
+  Grid,
+  Avatar,
 } from "@mui/material";
+
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 function Students() {
+
+  const [batch, setBatch] = useState("2024-2028");
+
   const [students, setStudents] = useState([]);
 
-  const loadStudents = async () => {
-    const res = await fetch("http://127.0.0.1:8000/students");
-    const data = await res.json();
-    setStudents(data);
-  };
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    loadStudents();
+    fetchStudents(batch);
   }, []);
 
+  const fetchStudents = async (selectedBatch) => {
+
+    const response = await fetch(
+      `http://127.0.0.1:8000/students/${selectedBatch}`
+    );
+
+    const data = await response.json();
+
+    setStudents(data);
+
+  };
+
+  const handleBatchChange = (e) => {
+
+    setBatch(e.target.value);
+
+    fetchStudents(e.target.value);
+
+  };
+
+  const handleView = async (id) => {
+
+    const response = await fetch(
+      `http://127.0.0.1:8000/student/${id}`
+    );
+
+    const data = await response.json();
+
+    setSelectedStudent(data);
+
+    setOpen(true);
+
+  };
+
+  const handleClose = () => {
+
+    setOpen(false);
+
+    setSelectedStudent(null);
+
+  };
+
   return (
-    <Box sx={{ p: 3 }}>
+
+    <Box>
+
       <Typography
         variant="h4"
-        fontWeight="bold"
-        color="#1e3a8a"
-        mb={4}
+        sx={{
+          mb:3,
+          fontWeight:"bold",
+          color:"#1e3a8a",
+        }}
       >
-        Student Records
+        👨‍🎓 Students
       </Typography>
 
-      <Grid container spacing={3}>
-        {students.map((student) => (
-          <Grid item xs={12} md={6} lg={4} key={student.id}>
-            <Card
-              elevation={6}
+      <Paper
+        sx={{
+          p:3,
+          mb:3,
+          borderRadius:3,
+        }}
+      >
+
+        <FormControl
+          sx={{
+            width:250,
+          }}
+        >
+
+          <InputLabel>
+            Batch
+          </InputLabel>
+
+          <Select
+            value={batch}
+            label="Batch"
+            onChange={handleBatchChange}
+          >
+
+            <MenuItem value="2023-2027">
+              2023-2027
+            </MenuItem>
+
+            <MenuItem value="2024-2028">
+              2024-2028
+            </MenuItem>
+
+            <MenuItem value="2025-2029">
+              2025-2029
+            </MenuItem>
+
+          </Select>
+
+        </FormControl>
+
+      </Paper>
+
+      <TableContainer component={Paper}>
+
+        <Table>
+
+          <TableHead>
+
+            <TableRow
               sx={{
-                borderRadius: 4,
-                transition: "0.3s",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                },
+                background:"#1e3a8a",
               }}
             >
-              <CardContent>
 
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  mb={2}
-                >
-                  <Avatar
-                    sx={{
-                      width: 80,
-                      height: 80,
-                      bgcolor: "#1e3a8a",
-                    }}
-                  >
-                    <PersonIcon sx={{ fontSize: 45 }} />
-                  </Avatar>
-                </Box>
+              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+                Name
+              </TableCell>
 
-                <Typography
-                  align="center"
-                  fontWeight="bold"
-                  fontSize={22}
-                >
+              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+                Register No
+              </TableCell>
+
+              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+                Department
+              </TableCell>
+
+              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+                CGPA
+              </TableCell>
+
+              <TableCell
+                align="center"
+                sx={{color:"white",fontWeight:"bold"}}
+              >
+                Action
+              </TableCell>
+
+            </TableRow>
+
+          </TableHead>
+
+          <TableBody>
+
+            {students.map((student)=>(
+
+              <TableRow
+                key={student.id}
+                hover
+              >
+
+                <TableCell>
+
                   {student.student_name}
-                </Typography>
 
-                <Typography
-                  align="center"
-                  color="gray"
-                  mb={2}
-                >
+                </TableCell>
+
+                <TableCell>
+
                   {student.register_number}
-                </Typography>
 
-                <Chip
-                  icon={<SchoolIcon />}
-                  label={student.department}
-                  color="primary"
-                  sx={{ mb: 1 }}
-                />
+                </TableCell>
 
-                <Typography mt={2}>
-                  <b>Batch :</b> {student.batch}
-                </Typography>
+                <TableCell>
 
-                <Typography>
-                  <b>Section :</b> {student.section}
-                </Typography>
+                  {student.department}
 
-                <Typography>
-                  <b>Semester :</b> {student.current_semester}
-                </Typography>
+                </TableCell>
 
-                <Typography
-                  fontWeight="bold"
-                  color="green"
-                  mt={1}
-                >
-                  CGPA : {student.current_cgpa}
-                </Typography>
+                <TableCell>
 
-                <Box
-                  display="flex"
-                  gap={2}
-                  mt={3}
-                >
+                  <Chip
+                    color="success"
+                    label={student.current_cgpa}
+                  />
+
+                </TableCell>
+
+                <TableCell align="center">
+
                   <Button
-                    fullWidth
                     variant="contained"
-                    startIcon={<EditIcon />}
+                    onClick={() => handleView(student.id)}
+                  >
+                    View
+                  </Button>
+
+                </TableCell>
+
+              </TableRow>
+
+            ))}
+
+          </TableBody>
+
+        </Table>
+
+      </TableContainer>
+            {/* View Student Dialog */}
+
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="md"
+        fullWidth
+      >
+        {selectedStudent && (
+          <>
+
+            <DialogTitle
+              sx={{
+                background: "#1e3a8a",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: 24,
+              }}
+            >
+              👨‍🎓 Student Profile
+            </DialogTitle>
+
+            <DialogContent sx={{ p: 4 }}>
+
+              {/* Profile Card */}
+
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  mb: 4,
+                  background:
+                    "linear-gradient(135deg,#1e3a8a,#2563eb)",
+                  color: "#fff",
+                }}
+              >
+                <Grid container spacing={3} alignItems="center">
+
+                  <Grid item xs={12} md={2}>
+
+                    <Avatar
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        bgcolor: "#fff",
+                        color: "#1e3a8a",
+                        mx: "auto",
+                      }}
+                    >
+                      <PersonIcon fontSize="large" />
+                    </Avatar>
+
+                  </Grid>
+
+                  <Grid item xs={12} md={7}>
+
+                    <Typography variant="h5" fontWeight="bold">
+                      {selectedStudent.student_name}
+                    </Typography>
+
+                    <Typography sx={{ mt: 1 }}>
+                      Register No :
+                      {" "}
+                      {selectedStudent.register_number}
+                    </Typography>
+
+                    <Typography>
+                      Department :
+                      {" "}
+                      {selectedStudent.department}
+                    </Typography>
+
+                    <Typography>
+                      Batch :
+                      {" "}
+                      {selectedStudent.batch}
+                    </Typography>
+
+                    <Typography>
+                      Section :
+                      {" "}
+                      {selectedStudent.section || "-"}
+                    </Typography>
+
+                    <Typography>
+                      Current Semester :
+                      {" "}
+                      {selectedStudent.current_semester}
+                    </Typography>
+
+                  </Grid>
+
+                  <Grid item xs={12} md={3}>
+
+                    <Paper
+                      sx={{
+                        p: 2,
+                        textAlign: "center",
+                        borderRadius: 3,
+                      }}
+                    >
+
+                      <WorkspacePremiumIcon
+                        sx={{
+                          fontSize: 45,
+                          color: "#FFD700",
+                        }}
+                      />
+
+                      <Typography sx={{ mt: 1 }}>
+                        Current CGPA
+                      </Typography>
+
+                      <Typography
+                        variant="h4"
+                        fontWeight="bold"
+                        color="green"
+                      >
+                        {selectedStudent.current_cgpa}
+                      </Typography>
+
+                    </Paper>
+
+                  </Grid>
+
+                </Grid>
+
+              </Paper>
+
+              {/* Semester Results */}
+
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  color: "#1e3a8a",
+                  fontWeight: "bold",
+                }}
+              >
+                <SchoolIcon sx={{ mr: 1 }} />
+                Semester Wise GPA
+              </Typography>
+
+              {selectedStudent.semester_results.length === 0 ? (
+
+                <Typography color="gray">
+                  No Results Uploaded
+                </Typography>
+
+              ) : (
+
+                selectedStudent.semester_results.map((sem) => (
+
+                  <Paper
+                    key={sem.semester}
+                    elevation={2}
                     sx={{
-                      bgcolor: "#1976d2",
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 3,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    Edit
-                  </Button>
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                  >
-                    Delete
-                  </Button>
-                </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                      }}
+                    >
 
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                      <AssignmentTurnedInIcon color="success" />
+
+                      <Typography fontWeight="bold">
+                        Semester {sem.semester}
+                      </Typography>
+
+                    </Box>
+
+                    <Chip
+                      label={`SGPA : ${sem.sgpa}`}
+                      color="success"
+                    />
+
+                  </Paper>
+
+                ))
+
+              )}
+
+            </DialogContent>
+
+            <DialogActions sx={{ p: 3 }}>
+
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleClose}
+              >
+                Close
+              </Button>
+
+            </DialogActions>
+
+          </>
+        )}
+
+      </Dialog>
+
     </Box>
+
   );
+
 }
 
 export default Students;

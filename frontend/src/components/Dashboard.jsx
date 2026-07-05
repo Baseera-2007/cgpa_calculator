@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   FaUsers,
   FaChartLine,
@@ -15,26 +16,57 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  { name: "Sem 1", cgpa: 8.2 },
-  { name: "Sem 2", cgpa: 8.5 },
-  { name: "Sem 3", cgpa: 8.9 },
-  { name: "Sem 4", cgpa: 9.1 },
-];
-
 function Dashboard() {
+
+  const [dashboard, setDashboard] = useState({
+    total_students: 0,
+    average_cgpa: 0,
+    highest_cgpa: 0,
+    above9: 0,
+  });
+
+  const [chartData, setChartData] = useState([]);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/dashboard"
+      );
+
+      const data = await response.json();
+
+      setDashboard(data);
+
+      if (data.chart_data) {
+        setChartData(data.chart_data);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+
+  };
+
   return (
     <div style={{ marginTop: "25px" }}>
+
       <h2
         style={{
           color: "#1e3a8a",
           marginBottom: "20px",
         }}
       >
-        📊 Dashboard Overview
+        📊 Staff Dashboard
       </h2>
 
       {/* Dashboard Cards */}
+
       <div
         style={{
           display: "grid",
@@ -42,32 +74,35 @@ function Dashboard() {
           gap: "20px",
         }}
       >
+
         <Card
           icon={<FaUsers />}
           title="Total Students"
-          value="450"
+          value={dashboard.total_students}
         />
 
         <Card
           icon={<FaChartLine />}
           title="Average CGPA"
-          value="8.72"
+          value={dashboard.average_cgpa}
         />
 
         <Card
           icon={<FaUserGraduate />}
-          title="Top CGPA"
-          value="9.91"
+          title="Highest CGPA"
+          value={dashboard.highest_cgpa}
         />
 
         <Card
           icon={<FaTrophy />}
           title="Above 9 CGPA"
-          value="120"
+          value={dashboard.above9}
         />
+
       </div>
 
-      {/* Graph + Recent Activity */}
+      {/* Graph + Activity */}
+
       <div
         style={{
           display: "grid",
@@ -76,7 +111,8 @@ function Dashboard() {
           marginTop: "35px",
         }}
       >
-        {/* Chart */}
+
+        {/* Graph */}
 
         <div
           style={{
@@ -86,23 +122,36 @@ function Dashboard() {
             boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
           }}
         >
+
           <h3
             style={{
               color: "#1e3a8a",
               marginBottom: "20px",
             }}
           >
-            Semester Performance
+            Average CGPA by Batch
           </h3>
 
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <XAxis dataKey="name" />
+
+            <BarChart data={chartData}>
+
+              <XAxis dataKey="batch" />
+
               <YAxis />
+
               <Tooltip />
-              <Bar dataKey="cgpa" fill="#1e3a8a" radius={[8, 8, 0, 0]} />
+
+              <Bar
+                dataKey="cgpa"
+                fill="#1e3a8a"
+                radius={[8, 8, 0, 0]}
+              />
+
             </BarChart>
+
           </ResponsiveContainer>
+
         </div>
 
         {/* Recent Activity */}
@@ -115,29 +164,42 @@ function Dashboard() {
             boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
           }}
         >
+
           <h3
             style={{
               color: "#1e3a8a",
               marginBottom: "20px",
             }}
           >
-            Recent Activity
+            Summary
           </h3>
 
-          <Activity text="Semester 3 Result Uploaded" />
+          <Activity
+            text={`Total Students : ${dashboard.total_students}`}
+          />
 
-          <Activity text="450 Students Processed" />
+          <Activity
+            text={`Average CGPA : ${dashboard.average_cgpa}`}
+          />
 
-          <Activity text="Average CGPA Updated" />
+          <Activity
+            text={`Highest CGPA : ${dashboard.highest_cgpa}`}
+          />
 
-          <Activity text="Reports Ready" />
+          <Activity
+            text={`Students Above 9 CGPA : ${dashboard.above9}`}
+          />
+
         </div>
+
       </div>
+
     </div>
   );
 }
 
 function Card({ icon, title, value }) {
+
   return (
     <div
       style={{
@@ -148,6 +210,7 @@ function Card({ icon, title, value }) {
         boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
       }}
     >
+
       <div
         style={{
           fontSize: "30px",
@@ -166,11 +229,13 @@ function Card({ icon, title, value }) {
       </h3>
 
       <h1>{value}</h1>
+
     </div>
   );
 }
 
 function Activity({ text }) {
+
   return (
     <div
       style={{
@@ -181,9 +246,11 @@ function Activity({ text }) {
         color: "#444",
       }}
     >
+
       <FaCheckCircle color="green" />
 
       <span>{text}</span>
+
     </div>
   );
 }

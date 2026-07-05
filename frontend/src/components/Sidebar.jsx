@@ -12,29 +12,35 @@ function Sidebar() {
         {role === "staff" ? (
           <>
             <li>
-              <NavLink to="/staff">🏠 Dashboard</NavLink>
+              <NavLink to="/staff">
+                🏠 Dashboard
+              </NavLink>
             </li>
 
             <li>
-              <NavLink to="/staff/students">👨‍🎓 Students</NavLink>
+              <NavLink to="/staff/students">
+                👨‍🎓 Students
+              </NavLink>
             </li>
 
             <li>
-              <NavLink to="/staff/reports">📄 Reports</NavLink>
-            </li>
-
-            <li>
-              <NavLink to="/staff/upload-results">📤 Upload Results</NavLink>
+              <NavLink to="/staff/reports">
+                📄 Reports
+              </NavLink>
             </li>
           </>
         ) : (
           <>
             <li>
-              <NavLink to="/student">📤 Upload Results</NavLink>
+              <NavLink to="/student">
+                📤 Upload Results
+              </NavLink>
             </li>
 
             <li>
-              <NavLink to="/student/profile">👤 My Profile</NavLink>
+              <NavLink to="/student/profile">
+                👤 My Profile
+              </NavLink>
             </li>
           </>
         )}

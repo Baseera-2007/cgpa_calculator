@@ -381,3 +381,86 @@ def delete_student(student_id: int):
     return {
         "message": "Student deleted successfully"
     }
+@app.get("/dashboard")
+def dashboard():
+
+    db = SessionLocal()
+
+    students = db.query(Student).all()
+
+    total_students = len(students)
+
+    if total_students == 0:
+        return {
+            "total_students": 0,
+            "average_cgpa": 0,
+            "highest_cgpa": 0,
+            "above9": 0
+        }
+
+    total = 0
+    highest = 0
+    above9 = 0
+
+    for student in students:
+
+        cgpa = float(student.current_cgpa)
+
+        total += cgpa
+
+        if cgpa > highest:
+            highest = cgpa
+
+        if cgpa >= 9:
+            above9 += 1
+
+    db.close()
+
+    return {
+        "total_students": total_students,
+        "average_cgpa": round(total / total_students, 2),
+        "highest_cgpa": highest,
+        "above9": above9
+    }
+
+    # -------------------------------------------------
+# Get Students By Batch
+# -------------------------------------------------
+@app.get("/students/{batch}")
+def get_students_by_batch(batch: str):
+
+    db = SessionLocal()
+
+    students = db.query(Student).filter(
+        Student.batch == batch
+    ).all()
+
+    result = []
+
+    for s in students:
+        result.append({
+            "id": s.id,
+            "student_name": s.student_name,
+            "register_number": s.register_number,
+            "department": s.department,
+            "current_cgpa": float(s.current_cgpa or 0),
+        })
+
+    db.close()
+
+    return result
+
+
+# -------------------------------------------------
+# Available Batches
+# -------------------------------------------------
+@app.get("/batches")
+def get_batches():
+
+    db = SessionLocal()
+
+    batches = db.query(Student.batch).distinct().all()
+
+    db.close()
+
+    return [b[0] for b in batches if b[0]]
