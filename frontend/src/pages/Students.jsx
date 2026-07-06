@@ -22,49 +22,35 @@ import {
   Box,
   Grid,
   Avatar,
+  Divider,
 } from "@mui/material";
 
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 function Students() {
 
-  const [batch, setBatch] = useState("2024-2028");
-
   const [students, setStudents] = useState([]);
-
+  const [batch, setBatch] = useState("2024-2028");
   const [selectedStudent, setSelectedStudent] = useState(null);
-
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    fetchStudents(batch);
+    fetchStudents();
   }, []);
 
-  const fetchStudents = async (selectedBatch) => {
-
-    const response = await fetch(
-      `http://127.0.0.1:8000/students/${selectedBatch}`
-    );
-
+  const fetchStudents = async () => {
+    const response = await fetch("http://127.0.0.1:8000/students");
     const data = await response.json();
-
     setStudents(data);
-
   };
 
-  const handleBatchChange = (e) => {
-
-    setBatch(e.target.value);
-
-    fetchStudents(e.target.value);
-
-  };
+  const filteredStudents = students.filter(
+    (student) => student.batch === batch
+  );
 
   const handleView = async (id) => {
-
     const response = await fetch(
       `http://127.0.0.1:8000/student/${id}`
     );
@@ -72,233 +58,183 @@ function Students() {
     const data = await response.json();
 
     setSelectedStudent(data);
-
     setOpen(true);
-
-  };
-
-  const handleClose = () => {
-
-    setOpen(false);
-
-    setSelectedStudent(null);
-
   };
 
   return (
-
-    <Box>
-
+    <Paper
+      sx={{
+        p: 4,
+        borderRadius: 4,
+      }}
+    >
       <Typography
         variant="h4"
         sx={{
-          mb:3,
-          fontWeight:"bold",
-          color:"#1e3a8a",
+          color: "#1e3a8a",
+          fontWeight: "bold",
+          mb: 3,
         }}
       >
-        👨‍🎓 Students
+        Students
       </Typography>
 
-      <Paper
+      <FormControl
         sx={{
-          p:3,
-          mb:3,
-          borderRadius:3,
+          width: 250,
+          mb: 3,
         }}
       >
+        <InputLabel>Select Batch</InputLabel>
 
-        <FormControl
-          sx={{
-            width:250,
-          }}
+        <Select
+          value={batch}
+          label="Select Batch"
+          onChange={(e) => setBatch(e.target.value)}
         >
+          <MenuItem value="2023-2027">
+            2023-2027
+          </MenuItem>
 
-          <InputLabel>
-            Batch
-          </InputLabel>
+          <MenuItem value="2024-2028">
+            2024-2028
+          </MenuItem>
 
-          <Select
-            value={batch}
-            label="Batch"
-            onChange={handleBatchChange}
-          >
+          <MenuItem value="2025-2029">
+            2025-2029
+          </MenuItem>
 
-            <MenuItem value="2023-2027">
-              2023-2027
-            </MenuItem>
+        </Select>
+      </FormControl>
 
-            <MenuItem value="2024-2028">
-              2024-2028
-            </MenuItem>
-
-            <MenuItem value="2025-2029">
-              2025-2029
-            </MenuItem>
-
-          </Select>
-
-        </FormControl>
-
-      </Paper>
-
-      <TableContainer component={Paper}>
-
+      <TableContainer component={Paper} elevation={3}>
         <Table>
 
-          <TableHead>
+          <TableHead
+            sx={{
+              background: "#1e3a8a",
+            }}
+          >
+            <TableRow>
 
-            <TableRow
-              sx={{
-                background:"#1e3a8a",
-              }}
-            >
-
-              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Name
               </TableCell>
 
-              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Register No
               </TableCell>
 
-              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Department
               </TableCell>
 
-              <TableCell sx={{color:"white",fontWeight:"bold"}}>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 CGPA
               </TableCell>
 
-              <TableCell
-                align="center"
-                sx={{color:"white",fontWeight:"bold"}}
-              >
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Action
               </TableCell>
 
             </TableRow>
-
           </TableHead>
 
           <TableBody>
 
-            {students.map((student)=>(
+            {filteredStudents.map((student) => (
+              <TableRow key={student.id} hover>
 
-              <TableRow
-                key={student.id}
-                hover
-              >
+                <TableCell>{student.student_name}</TableCell>
 
-                <TableCell>
+                <TableCell>{student.register_number}</TableCell>
 
-                  {student.student_name}
+                <TableCell>{student.department}</TableCell>
 
-                </TableCell>
+                <TableCell>{student.current_cgpa}</TableCell>
 
                 <TableCell>
-
-                  {student.register_number}
-
-                </TableCell>
-
-                <TableCell>
-
-                  {student.department}
-
-                </TableCell>
-
-                <TableCell>
-
-                  <Chip
-                    color="success"
-                    label={student.current_cgpa}
-                  />
-
-                </TableCell>
-
-                <TableCell align="center">
-
                   <Button
                     variant="contained"
                     onClick={() => handleView(student.id)}
                   >
                     View
                   </Button>
-
                 </TableCell>
 
               </TableRow>
-
             ))}
 
           </TableBody>
 
         </Table>
-
       </TableContainer>
-            {/* View Student Dialog */}
+            {/* Student Details Dialog */}
 
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
         maxWidth="md"
         fullWidth
       >
-        {selectedStudent && (
-          <>
+        <DialogTitle
+          sx={{
+            fontSize: 28,
+            fontWeight: "bold",
+            color: "#1e3a8a",
+          }}
+        >
+          Student Details
+        </DialogTitle>
 
-            <DialogTitle
-              sx={{
-                background: "#1e3a8a",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: 24,
-              }}
-            >
-              👨‍🎓 Student Profile
-            </DialogTitle>
+        <DialogContent sx={{ p: 4 }}>
 
-            <DialogContent sx={{ p: 4 }}>
+          {selectedStudent && (
+
+            <>
 
               {/* Profile Card */}
 
               <Paper
-                elevation={3}
+                elevation={5}
                 sx={{
-                  p: 3,
-                  borderRadius: 3,
-                  mb: 4,
+                  p: 4,
+                  borderRadius: 4,
                   background:
                     "linear-gradient(135deg,#1e3a8a,#2563eb)",
                   color: "#fff",
+                  mb: 4,
                 }}
               >
+
                 <Grid container spacing={3} alignItems="center">
 
                   <Grid item xs={12} md={2}>
 
                     <Avatar
                       sx={{
-                        width: 80,
-                        height: 80,
+                        width: 100,
+                        height: 100,
                         bgcolor: "#fff",
                         color: "#1e3a8a",
                         mx: "auto",
                       }}
                     >
-                      <PersonIcon fontSize="large" />
+                      <PersonIcon sx={{ fontSize: 50 }} />
                     </Avatar>
 
                   </Grid>
 
-                  <Grid item xs={12} md={7}>
+                  <Grid item xs={12} md={10}>
 
-                    <Typography variant="h5" fontWeight="bold">
+                    <Typography
+                      variant="h4"
+                      fontWeight="bold"
+                    >
                       {selectedStudent.student_name}
                     </Typography>
 
-                    <Typography sx={{ mt: 1 }}>
+                    <Typography sx={{ mt: 2 }}>
                       Register No :
                       {" "}
                       {selectedStudent.register_number}
@@ -317,49 +253,21 @@ function Students() {
                     </Typography>
 
                     <Typography>
-                      Section :
-                      {" "}
-                      {selectedStudent.section || "-"}
+                      Section : A
                     </Typography>
 
-                    <Typography>
-                      Current Semester :
-                      {" "}
-                      {selectedStudent.current_semester}
-                    </Typography>
-
-                  </Grid>
-
-                  <Grid item xs={12} md={3}>
-
-                    <Paper
+                    <Typography
                       sx={{
-                        p: 2,
-                        textAlign: "center",
-                        borderRadius: 3,
+                        mt: 2,
+                        fontSize: 24,
+                        fontWeight: "bold",
+                        color: "#FFD54F",
                       }}
                     >
-
-                      <WorkspacePremiumIcon
-                        sx={{
-                          fontSize: 45,
-                          color: "#FFD700",
-                        }}
-                      />
-
-                      <Typography sx={{ mt: 1 }}>
-                        Current CGPA
-                      </Typography>
-
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="green"
-                      >
-                        {selectedStudent.current_cgpa}
-                      </Typography>
-
-                    </Paper>
+                      CGPA :
+                      {" "}
+                      {selectedStudent.current_cgpa}
+                    </Typography>
 
                   </Grid>
 
@@ -367,32 +275,48 @@ function Students() {
 
               </Paper>
 
-              {/* Semester Results */}
+              {/* Semester Heading */}
 
-              <Typography
-                variant="h6"
+              <Box
                 sx={{
-                  mb: 2,
-                  color: "#1e3a8a",
-                  fontWeight: "bold",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 3,
+                  pb: 2,
+                  borderBottom:
+                    "2px solid #E5E7EB",
                 }}
               >
-                <SchoolIcon sx={{ mr: 1 }} />
-                Semester Wise GPA
-              </Typography>
 
-              {selectedStudent.semester_results.length === 0 ? (
+                <SchoolIcon
+                  sx={{
+                    color: "#1e3a8a",
+                    fontSize: 32,
+                  }}
+                />
 
-                <Typography color="gray">
-                  No Results Uploaded
+                <Typography
+                  sx={{
+                    fontSize: 28,
+                    fontWeight: "bold",
+                    color: "#1e3a8a",
+                  }}
+                >
+                  Semester Performance
                 </Typography>
 
-              ) : (
+              </Box>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((semester) => {
 
-                selectedStudent.semester_results.map((sem) => (
+                const result = selectedStudent.semester_results.find(
+                  (sem) => sem.semester === semester
+                );
+
+                return (
 
                   <Paper
-                    key={sem.semester}
+                    key={semester}
                     elevation={2}
                     sx={{
                       p: 2,
@@ -401,6 +325,10 @@ function Students() {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      transition: "0.3s",
+                      "&:hover": {
+                        transform: "scale(1.01)",
+                      },
                     }}
                   >
 
@@ -412,45 +340,59 @@ function Students() {
                       }}
                     >
 
-                      <AssignmentTurnedInIcon color="success" />
+                      <AssignmentTurnedInIcon
+                        color={result ? "success" : "disabled"}
+                      />
 
                       <Typography fontWeight="bold">
-                        Semester {sem.semester}
+                        Semester {semester}
                       </Typography>
 
                     </Box>
 
-                    <Chip
-                      label={`SGPA : ${sem.sgpa}`}
-                      color="success"
-                    />
+                    {result ? (
+
+                      <Chip
+                        label={`SGPA : ${result.sgpa}`}
+                        color="success"
+                      />
+
+                    ) : (
+
+                      <Chip
+                        label="Not Uploaded"
+                        color="default"
+                      />
+
+                    )}
 
                   </Paper>
 
-                ))
+                );
 
-              )}
+              })}
 
-            </DialogContent>
+            </>
 
-            <DialogActions sx={{ p: 3 }}>
+          )}
 
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleClose}
-              >
-                Close
-              </Button>
+        </DialogContent>
 
-            </DialogActions>
+        <DialogActions>
 
-          </>
-        )}
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setOpen(false)}
+          >
+            Close
+          </Button>
+
+        </DialogActions>
 
       </Dialog>
 
-    </Box>
+    </Paper>
 
   );
 

@@ -12,7 +12,7 @@ function Sidebar() {
         {role === "staff" ? (
           <>
             <li>
-              <NavLink to="/staff">
+              <NavLink to="/staff" end>
                 🏠 Dashboard
               </NavLink>
             </li>
@@ -32,7 +32,7 @@ function Sidebar() {
         ) : (
           <>
             <li>
-              <NavLink to="/student">
+              <NavLink to="/student" end>
                 📤 Upload Results
               </NavLink>
             </li>

@@ -10,7 +10,6 @@ import {
 
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 function StudentProfile() {
@@ -96,48 +95,19 @@ function StudentProfile() {
             Batch : {student.batch}
           </Typography>
 
-          <Typography>
-            Section : {student.section}
+          <Typography sx={{ mt: 0.5 }}>
+            Section : A
           </Typography>
 
-          <Typography>
-            Current Semester : Semester {student.current_semester}
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Paper
+          <Typography
             sx={{
-              p: 3,
-              textAlign: "center",
-              borderRadius: 3,
-              bgcolor: "#fff",
-            }}
-          >
-            <WorkspacePremiumIcon
-              sx={{
-                color: "#FFD700",
-                fontSize: 50,
-              }}
-            />
-
-            <Typography
-              sx={{
-                color: "#444",
-                mt: 1,
-              }}
-            >
-              Current CGPA
-            </Typography>
-
-            <Typography
-              variant="h3"
-              fontWeight="bold"
-              color="green"
-            >
-              {student.current_cgpa}
-            </Typography>
-          </Paper>
+            mt: 2,
+            fontSize: "22px",
+            fontWeight: "bold",
+            color: "#FFD54F",
+            }}>
+            CGPA : {student.current_cgpa}
+          </Typography>
         </Grid>
       </Grid>
     </Paper>
@@ -150,15 +120,34 @@ function StudentProfile() {
         borderRadius: 4,
       }}
     >
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        color="#1e3a8a"
-        mb={3}
-      >
-        <SchoolIcon sx={{ mr: 1 }} />
-        Semester Performance
-      </Typography>
+      <Box
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+    mb: 3,
+    pb: 2,
+    borderBottom: "2px solid #E5E7EB",
+  }}
+>
+  <SchoolIcon
+    sx={{
+      color: "#1e3a8a",
+      fontSize: 34,
+    }}
+  />
+
+  <Typography
+    sx={{
+      fontSize: "28px",
+      fontWeight: "bold",
+      color: "#1e3a8a",
+      fontFamily: "Poppins",
+    }}
+  >
+    Semester Performance
+  </Typography>
+</Box>
 
       {[1,2,3,4,5,6,7,8].map((semester)=>{
 
