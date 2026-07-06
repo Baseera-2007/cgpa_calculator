@@ -182,7 +182,7 @@ async def upload_pdf(
             student_name=data["student_name"],
             department=user.department if user else data["department"],
             batch=batch,
-            section=user.section if user else "A",
+            section="A",
             current_semester=int(semester),
             current_cgpa=sgpa
         )
