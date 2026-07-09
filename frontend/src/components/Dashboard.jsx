@@ -4,53 +4,43 @@ import {
   FaChartLine,
   FaUserGraduate,
   FaTrophy,
-  FaCheckCircle,
 } from "react-icons/fa";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-
-function Dashboard() {
+function Dashboard({ batch }) {
 
   const [dashboard, setDashboard] = useState({
     total_students: 0,
     average_cgpa: 0,
     highest_cgpa: 0,
     above9: 0,
+    batch: batch,
+    department: "CSBS",
+    lowest_cgpa: 0,
+    pass_percentage: 100,
+    top_students: [],
   });
-
-  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [batch]);
 
   const fetchDashboard = async () => {
-
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/dashboard"
+        `http://127.0.0.1:8000/dashboard?batch=${batch}`
       );
 
       const data = await response.json();
 
-      setDashboard(data);
-
-      if (data.chart_data) {
-        setChartData(data.chart_data);
-      }
+      setDashboard({
+        ...data,
+        batch: batch,
+      });
 
     } catch (err) {
       console.log(err);
     }
-
   };
 
   return (
@@ -59,7 +49,8 @@ function Dashboard() {
       <h2
         style={{
           color: "#1e3a8a",
-          marginBottom: "20px",
+          marginBottom: "25px",
+          fontWeight: "700",
         }}
       >
         📊 Staff Dashboard
@@ -71,29 +62,33 @@ function Dashboard() {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(4,1fr)",
-          gap: "20px",
+          gap: "22px",
         }}
       >
 
         <Card
+          color="#2563eb"
           icon={<FaUsers />}
           title="Total Students"
           value={dashboard.total_students}
         />
 
         <Card
+          color="#7c3aed"
           icon={<FaChartLine />}
           title="Average CGPA"
           value={dashboard.average_cgpa}
         />
 
         <Card
+          color="#10b981"
           icon={<FaUserGraduate />}
           title="Highest CGPA"
           value={dashboard.highest_cgpa}
         />
 
         <Card
+          color="#f59e0b"
           icon={<FaTrophy />}
           title="Above 9 CGPA"
           value={dashboard.above9}
@@ -101,94 +96,110 @@ function Dashboard() {
 
       </div>
 
-      {/* Graph + Activity */}
+      {/* Bottom Section */}
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "20px",
+          gridTemplateColumns: "1.3fr 1fr",
+          gap: "25px",
           marginTop: "35px",
         }}
       >
 
-        {/* Graph */}
+        {/* Batch Insights */}
 
         <div
           style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+            background: "#fff",
+            borderRadius: "20px",
+            padding: "30px",
+            boxShadow: "0 8px 25px rgba(0,0,0,.08)",
           }}
         >
 
-          <h3
+          <h2
             style={{
               color: "#1e3a8a",
-              marginBottom: "20px",
+              marginBottom: "25px",
             }}
           >
-            Average CGPA by Batch
-          </h3>
+            📋 Batch Insights
+          </h2>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <Insight label="Batch" value={dashboard.batch} />
 
-            <BarChart data={chartData}>
+          <Insight label="Department" value="CSBS" />
 
-              <XAxis dataKey="batch" />
+          <Insight
+            label="Total Students"
+            value={dashboard.total_students}
+          />
 
-              <YAxis />
+          <Insight
+            label="Average CGPA"
+            value={dashboard.average_cgpa}
+          />
 
-              <Tooltip />
+          <Insight
+            label="Highest CGPA"
+            value={dashboard.highest_cgpa}
+          />
 
-              <Bar
-                dataKey="cgpa"
-                fill="#1e3a8a"
-                radius={[8, 8, 0, 0]}
-              />
+          <Insight
+            label="Lowest CGPA"
+            value={dashboard.lowest_cgpa}
+          />
 
-            </BarChart>
-
-          </ResponsiveContainer>
+          
 
         </div>
 
-        {/* Recent Activity */}
+        {/* Top Students */}
 
         <div
           style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+            background: "#fff",
+            borderRadius: "20px",
+            padding: "30px",
+            boxShadow: "0 8px 25px rgba(0,0,0,.08)",
           }}
         >
 
-          <h3
+          <h2
             style={{
               color: "#1e3a8a",
-              marginBottom: "20px",
+              marginBottom: "25px",
             }}
           >
-            Summary
-          </h3>
+            🏆 Top 5 Students
+          </h2>
 
-          <Activity
-            text={`Total Students : ${dashboard.total_students}`}
-          />
+          {dashboard.top_students &&
+          dashboard.top_students.length > 0 ? (
 
-          <Activity
-            text={`Average CGPA : ${dashboard.average_cgpa}`}
-          />
+            dashboard.top_students.map((student, index) => (
 
-          <Activity
-            text={`Highest CGPA : ${dashboard.highest_cgpa}`}
-          />
+              <TopStudent
+                key={index}
+                rank={index + 1}
+                name={student.student_name}
+                cgpa={student.current_cgpa}
+              />
 
-          <Activity
-            text={`Students Above 9 CGPA : ${dashboard.above9}`}
-          />
+            ))
+
+          ) : (
+
+            <p
+              style={{
+                color: "#666",
+              }}
+            >
+              No student data available.
+            </p>
+
+          )}
 
         </div>
 
@@ -198,59 +209,158 @@ function Dashboard() {
   );
 }
 
-function Card({ icon, title, value }) {
-
+function Card({ icon, title, value, color }) {
   return (
     <div
       style={{
-        background: "#1e3a8a",
-        color: "white",
-        padding: "25px",
-        borderRadius: "15px",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+        background: "#ffffff",
+        borderRadius: "20px",
+        padding: "30px",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+        transition: "0.3s",
+        cursor: "pointer",
+        textAlign: "center",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-8px)";
+        e.currentTarget.style.boxShadow =
+          "0 18px 35px rgba(0,0,0,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0px)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 25px rgba(0,0,0,0.08)";
       }}
     >
 
       <div
         style={{
-          fontSize: "30px",
+          width: "70px",
+          height: "70px",
+          borderRadius: "50%",
+          background: color,
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 20px",
+          fontSize: "28px",
         }}
       >
         {icon}
       </div>
 
-      <h3
+      <div
         style={{
-          marginTop: "18px",
-          marginBottom: "10px",
+          color: "#666",
+          fontSize: "16px",
+          fontWeight: "600",
+          marginBottom: "15px",
         }}
       >
         {title}
-      </h3>
+      </div>
 
-      <h1>{value}</h1>
+      <div
+        style={{
+          fontSize: "38px",
+          fontWeight: "bold",
+          color: "#1e3a8a",
+        }}
+      >
+        {value}
+      </div>
 
     </div>
   );
 }
 
-function Activity({ text }) {
-
+function Insight({ label, value }) {
   return (
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        marginBottom: "18px",
-        color: "#444",
+        justifyContent: "space-between",
+        padding: "14px 0",
+        borderBottom: "1px solid #ececec",
       }}
     >
+      <span
+        style={{
+          color: "#666",
+          fontWeight: "600",
+        }}
+      >
+        {label}
+      </span>
 
-      <FaCheckCircle color="green" />
+      <span
+        style={{
+          color: "#1e3a8a",
+          fontWeight: "bold",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
 
-      <span>{text}</span>
+function TopStudent({ rank, name, cgpa }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "15px",
+        marginBottom: "12px",
+        borderRadius: "12px",
+        background: "#f8fafc",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "15px",
+        }}
+      >
+        <div
+          style={{
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            background: "#1e3a8a",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "bold",
+          }}
+        >
+          {rank}
+        </div>
 
+        <div
+          style={{
+            fontWeight: "bold",
+            color: "#222",
+          }}
+        >
+          {name}
+        </div>
+      </div>
+
+      <div
+        style={{
+          color: "green",
+          fontWeight: "bold",
+          fontSize: "18px",
+        }}
+      >
+        {cgpa}
+      </div>
     </div>
   );
 }

@@ -381,21 +381,30 @@ def delete_student(student_id: int):
     return {
         "message": "Student deleted successfully"
     }
+from typing import Optional
+
 @app.get("/dashboard")
-def dashboard():
+def dashboard(batch: Optional[str] = None):
 
     db = SessionLocal()
 
-    students = db.query(Student).all()
+    # Filter by batch if selected
+    if batch:
+        students = db.query(Student).filter(
+            Student.batch == batch
+        ).all()
+    else:
+        students = db.query(Student).all()
 
     total_students = len(students)
 
     if total_students == 0:
+        db.close()
         return {
             "total_students": 0,
             "average_cgpa": 0,
             "highest_cgpa": 0,
-            "above9": 0
+            "above9": 0,
         }
 
     total = 0
@@ -404,7 +413,7 @@ def dashboard():
 
     for student in students:
 
-        cgpa = float(student.current_cgpa)
+        cgpa = float(student.current_cgpa or 0)
 
         total += cgpa
 
@@ -420,7 +429,7 @@ def dashboard():
         "total_students": total_students,
         "average_cgpa": round(total / total_students, 2),
         "highest_cgpa": highest,
-        "above9": above9
+        "above9": above9,
     }
 
     # -------------------------------------------------
@@ -464,3 +473,60 @@ def get_batches():
     db.close()
 
     return [b[0] for b in batches if b[0]]
+from sqlalchemy import desc, asc
+
+@app.get("/report")
+def get_report(
+    batch: str,
+    filter: str = "all",
+    sort: str = "desc",
+):
+
+    db = SessionLocal()
+
+    query = db.query(Student).filter(Student.batch == batch)
+
+    if filter == "9":
+        query = query.filter(Student.current_cgpa >= 9)
+
+    elif filter == "8.5":
+        query = query.filter(Student.current_cgpa >= 8.5)
+
+    elif filter == "8":
+        query = query.filter(Student.current_cgpa >= 8)
+
+    elif filter == "7.5":
+        query = query.filter(Student.current_cgpa >= 7.5)
+
+    elif filter == "below7.5":
+        query = query.filter(Student.current_cgpa < 7.5)
+
+    if sort == "desc":
+        query = query.order_by(desc(Student.current_cgpa))
+
+    elif sort == "asc":
+        query = query.order_by(asc(Student.current_cgpa))
+
+    elif sort == "name":
+        query = query.order_by(Student.student_name)
+
+    elif sort == "reg":
+        query = query.order_by(Student.register_number)
+
+    students = query.all()
+
+    result = []
+
+    for s in students:
+        result.append({
+            "id": s.id,
+            "student_name": s.student_name,
+            "register_number": s.register_number,
+            "department": s.department,
+            "batch": s.batch,
+            "current_cgpa": float(s.current_cgpa or 0),
+        })
+
+    db.close()
+
+    return result
