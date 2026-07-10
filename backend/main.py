@@ -6,7 +6,13 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
+<<<<<<< HEAD
+from models import Student, SemesterResult, Subject, Attendance
+from schemas import AttendanceCreate
+from datetime import date 
+=======
 from models import User, Student, SemesterResult, Subject
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
 from cgpa import (
     get_grade_point,
     get_credit,
@@ -44,6 +50,13 @@ class StudentUpdate(BaseModel):
     student_name: str
     department: str
     batch: str
+    section: str
+    gender: str
+    student_name: str
+    department: str
+    batch: str
+    section: str
+    gender: str
     section: str
 
 from typing import Optional
@@ -218,6 +231,18 @@ async def upload_pdf(
     ).first()
 
     if not student:
+<<<<<<< HEAD
+        student = Student(
+    register_number=data["register_number"],
+    student_name=data["student_name"],
+    department=data["department"],
+    batch="2023-2027",
+    section="A",
+    gender="Female",
+    current_semester=int(data["semester"]),
+    current_cgpa=sgpa
+)
+=======
 
         user = db.query(User).filter(
             User.register_number == data["register_number"]
@@ -232,6 +257,7 @@ async def upload_pdf(
             current_semester=int(semester),
             current_cgpa=sgpa
         )
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
 
         db.add(student)
         db.commit()
@@ -384,11 +410,12 @@ def update_student(student_id: int, updated: StudentUpdate):
             status_code=404,
             detail="Student not found"
         )
-
+    
     student.student_name = updated.student_name
     student.department = updated.department
     student.batch = updated.batch
     student.section = updated.section
+    student.gender = updated.gender
 
     db.commit()
     db.refresh(student)
@@ -427,6 +454,43 @@ def delete_student(student_id: int):
     return {
         "message": "Student deleted successfully"
     }
+<<<<<<< HEAD
+  
+# ---------------------------------------
+# Mark Attendance
+# ---------------------------------------
+@app.post("/attendance")
+def mark_attendance(attendance: AttendanceCreate):
+
+    db = SessionLocal()
+
+    existing = db.query(Attendance).filter(
+        Attendance.student_id == attendance.student_id,
+        Attendance.attendance_date == attendance.attendance_date
+    ).first()
+
+    if existing:
+        existing.status = attendance.status
+        existing.marked_by = attendance.marked_by
+        db.commit()
+        db.refresh(existing)
+        db.close()
+
+        return {
+            "message": "Attendance updated successfully"
+        }
+
+    new_attendance = Attendance(
+        student_id=attendance.student_id,
+        attendance_date=attendance.attendance_date,
+        status=attendance.status,
+        marked_by=attendance.marked_by
+    )
+
+    db.add(new_attendance)
+    db.commit()
+    db.refresh(new_attendance)
+=======
 from typing import Optional
 
 @app.get("/dashboard")
@@ -468,10 +532,27 @@ def dashboard(batch: Optional[str] = None):
 
         if cgpa >= 9:
             above9 += 1
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
 
     db.close()
 
     return {
+<<<<<<< HEAD
+        "message": "Attendance marked successfully"
+    }
+
+
+# ---------------------------------------
+# Get Attendance By Date
+# ---------------------------------------
+@app.get("/attendance")
+def get_attendance(attendance_date: date):
+
+    db = SessionLocal()
+
+    attendance = db.query(Attendance).filter(
+        Attendance.attendance_date == attendance_date
+=======
         "total_students": total_students,
         "average_cgpa": round(total / total_students, 2),
         "highest_cgpa": highest,
@@ -488,10 +569,28 @@ def get_students_by_batch(batch: str):
 
     students = db.query(Student).filter(
         Student.batch == batch
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
     ).all()
 
     result = []
 
+<<<<<<< HEAD
+    for item in attendance:
+
+        student = db.query(Student).filter(
+            Student.id == item.student_id
+        ).first()
+
+        result.append({
+            "student_id": student.id,
+            "register_number": student.register_number,
+            "student_name": student.student_name,
+            "batch": student.batch,
+            "section": student.section,
+            "gender": student.gender,
+            "status": item.status,
+            "marked_by": item.marked_by
+=======
     for s in students:
         result.append({
             "id": s.id,
@@ -499,10 +598,14 @@ def get_students_by_batch(batch: str):
             "register_number": s.register_number,
             "department": s.department,
             "current_cgpa": float(s.current_cgpa or 0),
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
         })
 
     db.close()
 
+<<<<<<< HEAD
+    return result  
+=======
     return result
 
 
@@ -576,3 +679,4 @@ def get_report(
     db.close()
 
     return result
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
