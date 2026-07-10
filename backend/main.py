@@ -6,7 +6,9 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
-from models import Student, SemesterResult, Subject
+from models import Student, SemesterResult, Subject, Attendance
+from schemas import AttendanceCreate
+from datetime import date 
 from cgpa import (
     get_grade_point,
     get_credit,
@@ -44,6 +46,13 @@ class StudentUpdate(BaseModel):
     student_name: str
     department: str
     batch: str
+    section: str
+    gender: str
+    student_name: str
+    department: str
+    batch: str
+    section: str
+    gender: str
     section: str
 
 
@@ -90,16 +99,16 @@ async def upload_pdf(file: UploadFile = File(...)):
     ).first()
 
     if not student:
-
         student = Student(
-            register_number=data["register_number"],
-            student_name=data["student_name"],
-            department=data["department"],
-            batch="2023-2027",
-            section="A",
-            current_semester=int(data["semester"]),
-            current_cgpa=sgpa
-        )
+    register_number=data["register_number"],
+    student_name=data["student_name"],
+    department=data["department"],
+    batch="2023-2027",
+    section="A",
+    gender="Female",
+    current_semester=int(data["semester"]),
+    current_cgpa=sgpa
+)
 
         db.add(student)
         db.commit()
@@ -251,11 +260,12 @@ def update_student(student_id: int, updated: StudentUpdate):
             status_code=404,
             detail="Student not found"
         )
-
+    
     student.student_name = updated.student_name
     student.department = updated.department
     student.batch = updated.batch
     student.section = updated.section
+    student.gender = updated.gender
 
     db.commit()
     db.refresh(student)
@@ -294,3 +304,80 @@ def delete_student(student_id: int):
     return {
         "message": "Student deleted successfully"
     }
+  
+# ---------------------------------------
+# Mark Attendance
+# ---------------------------------------
+@app.post("/attendance")
+def mark_attendance(attendance: AttendanceCreate):
+
+    db = SessionLocal()
+
+    existing = db.query(Attendance).filter(
+        Attendance.student_id == attendance.student_id,
+        Attendance.attendance_date == attendance.attendance_date
+    ).first()
+
+    if existing:
+        existing.status = attendance.status
+        existing.marked_by = attendance.marked_by
+        db.commit()
+        db.refresh(existing)
+        db.close()
+
+        return {
+            "message": "Attendance updated successfully"
+        }
+
+    new_attendance = Attendance(
+        student_id=attendance.student_id,
+        attendance_date=attendance.attendance_date,
+        status=attendance.status,
+        marked_by=attendance.marked_by
+    )
+
+    db.add(new_attendance)
+    db.commit()
+    db.refresh(new_attendance)
+
+    db.close()
+
+    return {
+        "message": "Attendance marked successfully"
+    }
+
+
+# ---------------------------------------
+# Get Attendance By Date
+# ---------------------------------------
+@app.get("/attendance")
+def get_attendance(attendance_date: date):
+
+    db = SessionLocal()
+
+    attendance = db.query(Attendance).filter(
+        Attendance.attendance_date == attendance_date
+    ).all()
+
+    result = []
+
+    for item in attendance:
+
+        student = db.query(Student).filter(
+            Student.id == item.student_id
+        ).first()
+
+        result.append({
+            "student_id": student.id,
+            "register_number": student.register_number,
+            "student_name": student.student_name,
+            "batch": student.batch,
+            "section": student.section,
+            "gender": student.gender,
+            "status": item.status,
+            "marked_by": item.marked_by
+        })
+
+    db.close()
+
+    return result  
