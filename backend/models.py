@@ -9,15 +9,23 @@ class User(Base):
 
     username = Column(String, unique=True, nullable=False)
 
-    email = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=True)
 
-    register_number = Column(String, unique=True, nullable=False)
+    register_number = Column(String, unique=True, nullable=True)
 
     department = Column(String)
 
     password = Column(String, nullable=False)
 
     role = Column(String, default="student")
+
+    batch = Column(String)
+
+    section = Column(String)
+
+    faculty_id = Column(String)
+
+    gender = Column(String)
 
 class Student(Base):
     __tablename__ = "students"

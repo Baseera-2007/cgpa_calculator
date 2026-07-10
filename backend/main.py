@@ -46,13 +46,29 @@ class StudentUpdate(BaseModel):
     batch: str
     section: str
 
+from typing import Optional
+
 class SignupRequest(BaseModel):
+
     username: str
-    email: str
-    register_number: str
+
     department: str
+
+    role: str
+
     password: str
-    role: str = "student"
+
+    register_number: Optional[str] = None
+
+    faculty_id: Optional[str] = None
+
+    email: Optional[str] = None
+
+    batch: Optional[str] = None
+
+    section: Optional[str] = None
+
+    gender: Optional[str] = None
 
 class LoginRequest(BaseModel):
     username: str
@@ -66,9 +82,19 @@ def signup(user: SignupRequest):
 
     db = SessionLocal()
 
-    existing_user = db.query(User).filter(
-        User.register_number == user.register_number
-    ).first()
+    # Check duplicate
+
+    if user.role == "student":
+
+        existing_user = db.query(User).filter(
+            User.register_number == user.register_number
+        ).first()
+
+    else:
+
+        existing_user = db.query(User).filter(
+            User.faculty_id == user.faculty_id
+        ).first()
 
     if existing_user:
         db.close()
@@ -77,18 +103,38 @@ def signup(user: SignupRequest):
             detail="User already exists."
         )
 
+    # Create User
+
     new_user = User(
+
         username=user.username,
-        email=user.email,
-        register_number=user.register_number,
+
         department=user.department,
+
+        register_number=user.register_number,
+
+        faculty_id=user.faculty_id,
+
+        email=user.email,
+
+        batch=user.batch,
+
+        section=user.section,
+
+        gender=user.gender,
+
         password=user.password,
-        role=user.role
+
+        role=user.role,
+
     )
 
     db.add(new_user)
+
     db.commit()
+
     db.refresh(new_user)
+
     db.close()
 
     return {
