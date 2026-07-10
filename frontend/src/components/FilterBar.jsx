@@ -1,6 +1,6 @@
 import { Paper, Typography, MenuItem, TextField } from "@mui/material";
 
-function FilterBar() {
+function FilterBar({ batch, setBatch }) {
   return (
     <Paper
       elevation={3}
@@ -33,7 +33,8 @@ function FilterBar() {
       <TextField
         select
         label="Batch"
-        defaultValue="2023-2027"
+        value={batch}
+        onChange={(e) => setBatch(e.target.value)}
         sx={{ width: 280 }}
       >
         <MenuItem value="2023-2027">2023-2027</MenuItem>

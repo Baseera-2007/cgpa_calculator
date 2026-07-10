@@ -1,184 +1,173 @@
+import { useEffect, useState } from "react";
 import {
+  Box,
   Paper,
   Typography,
-  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Button,
-  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import DownloadIcon from "@mui/icons-material/Download";
-
-const data = [
-  { range: "9 - 10", students: 45 },
-  { range: "8 - 8.99", students: 120 },
-  { range: "7 - 7.99", students: 75 },
-  { range: "< 7", students: 15 },
-];
+import TableViewIcon from "@mui/icons-material/TableView";
 
 function Reports() {
-  return (
-    <div style={{ padding: "20px" }}>
-      {/* Title */}
-      <Typography
-        variant="h4"
-        sx={{
-          color: "#1e3a8a",
-          fontWeight: "bold",
-          mb: 1,
-        }}
-      >
-        📊 Academic Reports
-      </Typography>
+  const [students, setStudents] = useState([]);
+  const [batch, setBatch] = useState("2024-2028");
+  const [cgpaFilter, setCgpaFilter] = useState("all");
+  const [sort, setSort] = useState("desc");
 
-      <Typography
-        sx={{
-          color: "#555",
-          mb: 4,
-          fontSize: "16px",
-        }}
-      >
-        View overall academic performance and generate downloadable reports.
-      </Typography>
+  useEffect(() => {
+    fetchStudents();
+  }, [batch, cgpaFilter, sort]);
 
-      {/* Summary Cards */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={2.4}>
-          <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-            <Typography>Total Students</Typography>
-            <Typography variant="h4" color="#1e3a8a">
-              255
-            </Typography>
-          </Paper>
-        </Grid>
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/report?batch=${batch}&filter=${cgpaFilter}&sort=${sort}`
+      );
 
-        <Grid item xs={12} md={2.4}>
-          <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-            <Typography>Average CGPA</Typography>
-            <Typography variant="h4" color="#1e3a8a">
-              8.72
-            </Typography>
-          </Paper>
-        </Grid>
+      const data = await response.json();
+      setStudents(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-        <Grid item xs={12} md={2.4}>
-          <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-            <Typography>Highest CGPA</Typography>
-            <Typography variant="h4" color="#1e3a8a">
-              9.91
-            </Typography>
-          </Paper>
-        </Grid>
+  const generatePDF = () => {
+    alert("Generate PDF");
+  };
 
-        <Grid item xs={12} md={2.4}>
-          <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-            <Typography>Lowest CGPA</Typography>
-            <Typography variant="h4" color="#1e3a8a">
-              6.95
-            </Typography>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={2.4}>
-          <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-            <Typography>Pass Percentage</Typography>
-            <Typography variant="h4" color="#1e3a8a">
-              98%
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Chart */}
-      <Paper
-        sx={{
-          p: 4,
-          mt: 4,
-          borderRadius: 3,
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{
-            color: "#1e3a8a",
-            fontWeight: "bold",
-            mb: 3,
-          }}
-        >
-          CGPA Distribution
+  const generateExcel = () => {
+    alert("Generate Excel");
+  };
+    return (
+    <Box sx={{ p: 4 }}>
+      <Paper elevation={4} sx={{ p: 4, borderRadius: 4 }}>
+        <Typography variant="h4" fontWeight="bold" color="#1e3a8a">
+          Academic Report Generator
         </Typography>
 
-        <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data}>
-            <XAxis dataKey="range" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="students" fill="#1e3a8a" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Paper>
-
-      {/* Download Buttons */}
-      <Paper
-        sx={{
-          mt: 4,
-          p: 4,
-          borderRadius: 3,
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{
-            color: "#1e3a8a",
-            fontWeight: "bold",
-            mb: 3,
-          }}
-        >
-          Generate Reports
+        <Typography sx={{ color: "#666", mt: 1, mb: 4 }}>
+          Generate PDF and Excel reports batch-wise.
         </Typography>
 
         <Box
           sx={{
-            display: "flex",
+            display: "grid",
+            gridTemplateColumns: "repeat(3,1fr)",
             gap: 3,
-            flexWrap: "wrap",
+            mb: 4,
+          }}
+        >
+          <FormControl fullWidth>
+            <InputLabel>Batch</InputLabel>
+
+            <Select
+              value={batch}
+              label="Batch"
+              onChange={(e) => setBatch(e.target.value)}
+            >
+              <MenuItem value="2023-2027">2023-2027</MenuItem>
+              <MenuItem value="2024-2028">2024-2028</MenuItem>
+              <MenuItem value="2025-2029">2025-2029</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel>CGPA Filter</InputLabel>
+
+            <Select
+              value={cgpaFilter}
+              label="CGPA Filter"
+              onChange={(e) => setCgpaFilter(e.target.value)}
+            >
+              <MenuItem value="all">All Students</MenuItem>
+              <MenuItem value="9">Above 9</MenuItem>
+              <MenuItem value="8.5">Above 8.5</MenuItem>
+              <MenuItem value="8">Above 8</MenuItem>
+              <MenuItem value="7.5">Above 7.5</MenuItem>
+              <MenuItem value="below7.5">Below 7.5</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel>Sort</InputLabel>
+
+            <Select
+              value={sort}
+              label="Sort"
+              onChange={(e) => setSort(e.target.value)}
+            >
+              <MenuItem value="desc">Highest CGPA</MenuItem>
+              <MenuItem value="asc">Lowest CGPA</MenuItem>
+              <MenuItem value="name">Student Name</MenuItem>
+              <MenuItem value="reg">Register Number</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 3,
+            mb: 4,
           }}
         >
           <Button
             variant="contained"
             startIcon={<PictureAsPdfIcon />}
-            sx={{
-              background: "#1e3a8a",
-              px: 4,
-            }}
-            onClick={() => alert("PDF Report Downloaded")}
+            onClick={generatePDF}
           >
-            Download PDF
+            Generate PDF
           </Button>
 
           <Button
             variant="contained"
             color="success"
-            startIcon={<DownloadIcon />}
-            sx={{
-              px: 4,
-            }}
-            onClick={() => alert("Excel Report Downloaded")}
+            startIcon={<TableViewIcon />}
+            onClick={generateExcel}
           >
-            Export Excel
+            Generate Excel
           </Button>
         </Box>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><b>Register No</b></TableCell>
+                <TableCell><b>Name</b></TableCell>
+                <TableCell><b>Department</b></TableCell>
+                <TableCell><b>Batch</b></TableCell>
+                <TableCell><b>CGPA</b></TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {students.map((student) => (
+                <TableRow key={student.id}>
+                  <TableCell>{student.register_number}</TableCell>
+                  <TableCell>{student.student_name}</TableCell>
+                  <TableCell>{student.department}</TableCell>
+                  <TableCell>{student.batch}</TableCell>
+                  <TableCell>{student.current_cgpa}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
-    </div>
+    </Box>
   );
 }
 

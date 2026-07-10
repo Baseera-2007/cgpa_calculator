@@ -2,6 +2,22 @@ from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from database import Base
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    username = Column(String, unique=True, nullable=False)
+
+    email = Column(String, unique=True, nullable=False)
+
+    register_number = Column(String, unique=True, nullable=False)
+
+    department = Column(String)
+
+    password = Column(String, nullable=False)
+
+    role = Column(String, default="student")
 
 # ==========================================
 # Student Table

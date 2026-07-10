@@ -1,42 +1,86 @@
+import { useState } from "react";
+
 import FilterBar from "../components/FilterBar";
 import Dashboard from "../components/Dashboard";
 
+import {
+  Typography,
+  Box,
+  Paper,
+} from "@mui/material";
+
+import SchoolIcon from "@mui/icons-material/School";
+
 function Home() {
+
+  const [batch, setBatch] = useState("2023-2027");
+
   return (
-    <div
-      style={{
-        padding: "30px",
-      }}
-    >
-      <h1
-        style={{
-          color: "#1e3a8a",
-          marginBottom: "10px",
-          fontSize: "32px",
-          fontWeight: "bold",
+    <Box sx={{ p: 4 }}>
+
+      {/* Header */}
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 4,
+          mb: 4,
+          background:
+            "linear-gradient(135deg,#1e3a8a,#2563eb)",
+          color: "white",
         }}
       >
-        🎓 CSBS Academic Management System
-      </h1>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <SchoolIcon
+            sx={{
+              fontSize: 55,
+            }}
+          />
 
-      <p
-        style={{
-          color: "#555",
-          fontSize: "17px",
-          marginBottom: "30px",
-          lineHeight: "28px",
-        }}
-      >
-        Manage student records, upload semester results, calculate SGPA &
-        CGPA, and generate academic reports from one platform.
-      </p>
+          <Box>
+            <Typography
+              sx={{
+                fontSize: "34px",
+                fontWeight: "bold",
+                letterSpacing: 1,
+              }}
+            >
+              Academic Dashboard
+            </Typography>
 
-      {/* Only Batch Selection */}
-      <FilterBar />
+            <Typography
+              sx={{
+                mt: 1,
+                opacity: 0.9,
+                fontSize: "17px",
+              }}
+            >
+              Manage student records, upload semester results,
+              calculate SGPA & CGPA and monitor academic
+              performance batch-wise.
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Batch Filter */}
+      <Box sx={{ mb: 4 }}>
+        <FilterBar
+          batch={batch}
+          setBatch={setBatch}
+        />
+      </Box>
 
       {/* Dashboard */}
-      <Dashboard />
-    </div>
+      <Dashboard batch={batch} />
+
+    </Box>
   );
 }
 

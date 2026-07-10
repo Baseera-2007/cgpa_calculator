@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import shutil
@@ -6,9 +6,13 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
+<<<<<<< HEAD
 from models import Student, SemesterResult, Subject, Attendance
 from schemas import AttendanceCreate
 from datetime import date 
+=======
+from models import User, Student, SemesterResult, Subject
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
 from cgpa import (
     get_grade_point,
     get_credit,
@@ -55,12 +59,94 @@ class StudentUpdate(BaseModel):
     gender: str
     section: str
 
+class SignupRequest(BaseModel):
+    username: str
+    email: str
+    register_number: str
+    department: str
+    password: str
+    role: str = "student"
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# ---------------------------------------
+# Signup API
+# ---------------------------------------
+@app.post("/signup")
+def signup(user: SignupRequest):
+
+    db = SessionLocal()
+
+    existing_user = db.query(User).filter(
+        User.register_number == user.register_number
+    ).first()
+
+    if existing_user:
+        db.close()
+        raise HTTPException(
+            status_code=400,
+            detail="User already exists."
+        )
+
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        register_number=user.register_number,
+        department=user.department,
+        password=user.password,
+        role=user.role
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    db.close()
+
+    return {
+        "message": "Signup Successful"
+    }
+
+# ---------------------------------------
+# Login API
+# ---------------------------------------
+@app.post("/login")
+def login(user: LoginRequest):
+
+    db = SessionLocal()
+
+    existing_user = db.query(User).filter(
+        User.username == user.username,
+        User.password == user.password
+    ).first()
+
+    if not existing_user:
+        db.close()
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Username or Password"
+        )
+
+    db.close()
+
+    return {
+        "message": "Login Successful",
+        "username": existing_user.username,
+        "role": existing_user.role,
+        "register_number": existing_user.register_number
+    }
+
+    
 # ---------------------------------------
 # Upload PDF
 # ---------------------------------------
 @app.post("/upload-pdf")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(
+    file: UploadFile = File(...),
+    batch: str = Form(...),
+    semester: str = Form(...)
+):
 
     os.makedirs("uploads", exist_ok=True)
 
@@ -99,6 +185,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     ).first()
 
     if not student:
+<<<<<<< HEAD
         student = Student(
     register_number=data["register_number"],
     student_name=data["student_name"],
@@ -109,6 +196,22 @@ async def upload_pdf(file: UploadFile = File(...)):
     current_semester=int(data["semester"]),
     current_cgpa=sgpa
 )
+=======
+
+        user = db.query(User).filter(
+            User.register_number == data["register_number"]
+        ).first()
+
+        student = Student(
+            register_number=data["register_number"],
+            student_name=data["student_name"],
+            department=user.department if user else data["department"],
+            batch=batch,
+            section="A",
+            current_semester=int(semester),
+            current_cgpa=sgpa
+        )
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
 
         db.add(student)
         db.commit()
@@ -128,22 +231,23 @@ async def upload_pdf(file: UploadFile = File(...)):
             detail="Semester already uploaded."
         )
 
-    semester = SemesterResult(
+    semester_result = SemesterResult(
         student_id=student.id,
-        semester=int(data["semester"]),
+        semester=int(semester),
         sgpa=sgpa,
         result_pdf=file.filename
     )
 
-    db.add(semester)
+
+    db.add(semester_result)
     db.commit()
-    db.refresh(semester)
+    db.refresh(semester_result)
 
     for subject in data["subjects"]:
 
         db.add(
             Subject(
-                semester_result_id=semester.id,
+                semester_result_id=semester_result.id,
                 subject_code=subject["code"],
                 subject_name=subject["name"],
                 grade=subject["grade"],
@@ -304,6 +408,7 @@ def delete_student(student_id: int):
     return {
         "message": "Student deleted successfully"
     }
+<<<<<<< HEAD
   
 # ---------------------------------------
 # Mark Attendance
@@ -339,10 +444,54 @@ def mark_attendance(attendance: AttendanceCreate):
     db.add(new_attendance)
     db.commit()
     db.refresh(new_attendance)
+=======
+from typing import Optional
+
+@app.get("/dashboard")
+def dashboard(batch: Optional[str] = None):
+
+    db = SessionLocal()
+
+    # Filter by batch if selected
+    if batch:
+        students = db.query(Student).filter(
+            Student.batch == batch
+        ).all()
+    else:
+        students = db.query(Student).all()
+
+    total_students = len(students)
+
+    if total_students == 0:
+        db.close()
+        return {
+            "total_students": 0,
+            "average_cgpa": 0,
+            "highest_cgpa": 0,
+            "above9": 0,
+        }
+
+    total = 0
+    highest = 0
+    above9 = 0
+
+    for student in students:
+
+        cgpa = float(student.current_cgpa or 0)
+
+        total += cgpa
+
+        if cgpa > highest:
+            highest = cgpa
+
+        if cgpa >= 9:
+            above9 += 1
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
 
     db.close()
 
     return {
+<<<<<<< HEAD
         "message": "Attendance marked successfully"
     }
 
@@ -357,10 +506,29 @@ def get_attendance(attendance_date: date):
 
     attendance = db.query(Attendance).filter(
         Attendance.attendance_date == attendance_date
+=======
+        "total_students": total_students,
+        "average_cgpa": round(total / total_students, 2),
+        "highest_cgpa": highest,
+        "above9": above9,
+    }
+
+    # -------------------------------------------------
+# Get Students By Batch
+# -------------------------------------------------
+@app.get("/students/{batch}")
+def get_students_by_batch(batch: str):
+
+    db = SessionLocal()
+
+    students = db.query(Student).filter(
+        Student.batch == batch
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
     ).all()
 
     result = []
 
+<<<<<<< HEAD
     for item in attendance:
 
         student = db.query(Student).filter(
@@ -376,8 +544,93 @@ def get_attendance(attendance_date: date):
             "gender": student.gender,
             "status": item.status,
             "marked_by": item.marked_by
+=======
+    for s in students:
+        result.append({
+            "id": s.id,
+            "student_name": s.student_name,
+            "register_number": s.register_number,
+            "department": s.department,
+            "current_cgpa": float(s.current_cgpa or 0),
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977
         })
 
     db.close()
 
+<<<<<<< HEAD
     return result  
+=======
+    return result
+
+
+# -------------------------------------------------
+# Available Batches
+# -------------------------------------------------
+@app.get("/batches")
+def get_batches():
+
+    db = SessionLocal()
+
+    batches = db.query(Student.batch).distinct().all()
+
+    db.close()
+
+    return [b[0] for b in batches if b[0]]
+from sqlalchemy import desc, asc
+
+@app.get("/report")
+def get_report(
+    batch: str,
+    filter: str = "all",
+    sort: str = "desc",
+):
+
+    db = SessionLocal()
+
+    query = db.query(Student).filter(Student.batch == batch)
+
+    if filter == "9":
+        query = query.filter(Student.current_cgpa >= 9)
+
+    elif filter == "8.5":
+        query = query.filter(Student.current_cgpa >= 8.5)
+
+    elif filter == "8":
+        query = query.filter(Student.current_cgpa >= 8)
+
+    elif filter == "7.5":
+        query = query.filter(Student.current_cgpa >= 7.5)
+
+    elif filter == "below7.5":
+        query = query.filter(Student.current_cgpa < 7.5)
+
+    if sort == "desc":
+        query = query.order_by(desc(Student.current_cgpa))
+
+    elif sort == "asc":
+        query = query.order_by(asc(Student.current_cgpa))
+
+    elif sort == "name":
+        query = query.order_by(Student.student_name)
+
+    elif sort == "reg":
+        query = query.order_by(Student.register_number)
+
+    students = query.all()
+
+    result = []
+
+    for s in students:
+        result.append({
+            "id": s.id,
+            "student_name": s.student_name,
+            "register_number": s.register_number,
+            "department": s.department,
+            "batch": s.batch,
+            "current_cgpa": float(s.current_cgpa or 0),
+        })
+
+    db.close()
+
+    return result
+>>>>>>> 4c6ee56cea82c63d7a42f54ed23ff113b2f5a977

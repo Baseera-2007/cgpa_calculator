@@ -7,15 +7,21 @@ function MainLayout() {
     <>
       <Navbar />
 
-      <div style={{ display: "flex" }}>
+      <div
+        style={{
+          display: "flex",
+          minHeight: "calc(100vh - 70px)",
+          background: "#f5f7fb",
+        }}
+      >
         <Sidebar />
 
         <div
           style={{
             flex: 1,
             padding: "30px",
-            background: "#f5f7fb",
-            minHeight: "100vh",
+            minHeight: "calc(100vh - 70px)",
+            overflowY: "auto",
           }}
         >
           <Outlet />
