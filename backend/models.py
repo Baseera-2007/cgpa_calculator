@@ -9,9 +9,9 @@ class User(Base):
 
     username = Column(String, unique=True, nullable=False)
 
-    email = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=True)
 
-    register_number = Column(String, unique=True, nullable=False)
+    register_number = Column(String, unique=True, nullable=True)
 
     department = Column(String)
 

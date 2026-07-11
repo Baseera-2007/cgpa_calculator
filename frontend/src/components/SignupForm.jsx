@@ -14,17 +14,25 @@ import {
 } from "@mui/material";
 
 function SignupForm() {
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     username: "",
     department: "",
+
+    role: "",
+
     registerNumber: "",
+    facultyId: "",
+
+    batch: "",
+    section: "",
+    gender: "",
+
     email: "",
+
     password: "",
     confirmPassword: "",
-    role: "student",
   });
 
   const handleChange = (e) => {
@@ -35,7 +43,6 @@ function SignupForm() {
   };
 
   const handleSignup = async (e) => {
-
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
@@ -47,16 +54,30 @@ function SignupForm() {
       "http://127.0.0.1:8000/signup",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({
           username: formData.username,
           department: formData.department,
-          register_number: formData.registerNumber,
-          email: formData.email,
-          password: formData.password,
+
           role: formData.role,
+
+          register_number: formData.registerNumber,
+
+          faculty_id: formData.facultyId,
+
+          batch: formData.batch,
+
+          section: formData.section,
+
+          gender: formData.gender,
+
+          email: formData.email,
+
+          password: formData.password,
         }),
       }
     );
@@ -94,73 +115,187 @@ function SignupForm() {
 
       <Box component="form" onSubmit={handleSignup}>
 
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Register As</InputLabel>
+
+          <Select
+            name="role"
+            value={formData.role}
+            label="Register As"
+            onChange={handleChange}
+          >
+            <MenuItem value="">
+              <em>Select Role</em>
+            </MenuItem>
+
+            <MenuItem value="student">
+              Student
+            </MenuItem>
+
+            <MenuItem value="staff">
+              Staff
+            </MenuItem>
+
+          </Select>
+        </FormControl>
+
         <TextField
           fullWidth
+          margin="normal"
           label="Username"
           name="username"
-          margin="normal"
           value={formData.username}
           onChange={handleChange}
         />
 
         <TextField
           fullWidth
+          margin="normal"
           label="Department"
           name="department"
-          margin="normal"
           value={formData.department}
           onChange={handleChange}
         />
+                {/* Student Fields */}
 
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Role</InputLabel>
+        {formData.role === "student" && (
+          <>
 
-          <Select
-            name="role"
-            value={formData.role}
-            label="Role"
-            onChange={handleChange}
-          >
-            <MenuItem value="student">Student</MenuItem>
-            <MenuItem value="staff">Staff</MenuItem>
-          </Select>
-        </FormControl>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Register Number"
+              name="registerNumber"
+              value={formData.registerNumber}
+              onChange={handleChange}
+            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Academic Batch</InputLabel>
+
+              <Select
+                name="batch"
+                value={formData.batch}
+                label="Academic Batch"
+                onChange={handleChange}
+              >
+                <MenuItem value="">
+                  <em>Select Batch</em>
+                </MenuItem>
+
+                <MenuItem value="2023-2027">
+                  2023-2027
+                </MenuItem>
+
+                <MenuItem value="2024-2028">
+                  2024-2028
+                </MenuItem>
+
+                <MenuItem value="2025-2029">
+                  2025-2029
+                </MenuItem>
+
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Lab Batch</InputLabel>
+
+              <Select
+                name="section"
+                value={formData.section}
+                label="Lab Batch"
+                onChange={handleChange}
+              >
+                <MenuItem value="">
+                  <em>Select Lab Batch</em>
+                </MenuItem>
+
+                <MenuItem value="Batch 1">
+                  Batch 1
+                </MenuItem>
+
+                <MenuItem value="Batch 2">
+                  Batch 2
+                </MenuItem>
+
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Gender</InputLabel>
+
+              <Select
+                name="gender"
+                value={formData.gender}
+                label="Gender"
+                onChange={handleChange}
+              >
+                <MenuItem value="">
+                  <em>Select Gender</em>
+                </MenuItem>
+
+                <MenuItem value="Male">
+                  Male
+                </MenuItem>
+
+                <MenuItem value="Female">
+                  Female
+                </MenuItem>
+
+                <MenuItem value="Other">
+                  Other
+                </MenuItem>
+
+              </Select>
+            </FormControl>
+
+          </>
+        )}
+
+        {/* Staff Fields */}
+
+        {formData.role === "staff" && (
+          <>
+
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Faculty ID"
+              name="facultyId"
+              value={formData.facultyId}
+              onChange={handleChange}
+            />
+
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+
+          </>
+        )}
 
         <TextField
           fullWidth
-          label="Register Number"
-          name="registerNumber"
           margin="normal"
-          value={formData.registerNumber}
-          onChange={handleChange}
-        />
-
-        <TextField
-          fullWidth
-          label="Email"
-          type="email"
-          name="email"
-          margin="normal"
-          value={formData.email}
-          onChange={handleChange}
-        />
-
-        <TextField
-          fullWidth
           label="Password"
           type="password"
           name="password"
-          margin="normal"
           value={formData.password}
           onChange={handleChange}
         />
 
         <TextField
           fullWidth
+          margin="normal"
           label="Confirm Password"
           type="password"
           name="confirmPassword"
-          margin="normal"
           value={formData.confirmPassword}
           onChange={handleChange}
         />
@@ -172,17 +307,27 @@ function SignupForm() {
           sx={{
             mt: 3,
             py: 1.5,
+            background: "#1e3a8a",
+            "&:hover": {
+              background: "#163172",
+            },
           }}
         >
           Sign Up
         </Button>
 
-        <Typography align="center" sx={{ mt: 3 }}>
+        <Typography
+          align="center"
+          sx={{ mt: 3 }}
+        >
           Already have an account?{" "}
-          <Link to="/">Sign In</Link>
+          <Link to="/">
+            Sign In
+          </Link>
         </Typography>
 
       </Box>
+
     </Paper>
   );
 }

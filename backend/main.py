@@ -381,3 +381,4 @@ def get_attendance(attendance_date: date):
     db.close()
 
     return result  
+# test
