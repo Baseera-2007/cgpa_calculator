@@ -1,3 +1,4 @@
+from report import router as report_router
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -30,6 +31,7 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
+app.include_router(report_router)
 
 
 @app.get("/")
@@ -37,7 +39,48 @@ def home():
     return {
         "message": "CGPA Calculator Backend Running Successfully"
     }
+# ---------------------------------------
+# Login
+# ---------------------------------------
+@app.post("/login")
+def login(user: LoginRequest):
 
+    db = SessionLocal()
+
+    # Staff Login
+    if (
+        user.username.lower() == "staff"
+        and user.password == "staff123"
+    ):
+        db.close()
+
+        return {
+            "username": "staff",
+            "role": "staff",
+            "register_number": ""
+        }
+
+    # Student Login
+    student = db.query(Student).filter(
+        Student.student_name == user.username
+    ).first()
+
+    if student:
+
+        db.close()
+
+        return {
+            "username": student.student_name,
+            "role": "student",
+            "register_number": student.register_number
+        }
+
+    db.close()
+
+    raise HTTPException(
+        status_code=401,
+        detail="Invalid Username or Password"
+    )
 
 # ---------------------------------------
 # Request Model
@@ -48,12 +91,11 @@ class StudentUpdate(BaseModel):
     batch: str
     section: str
     gender: str
-    student_name: str
-    department: str
-    batch: str
-    section: str
-    gender: str
-    section: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
 # ---------------------------------------

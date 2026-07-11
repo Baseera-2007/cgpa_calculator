@@ -43,11 +43,17 @@ function Reports() {
   };
 
   const generatePDF = () => {
-    alert("Generate PDF");
+    window.open(
+      `http://127.0.0.1:8000/export-pdf?batch=${batch}`,
+      "_blank"
+    );
   };
 
   const generateExcel = () => {
-    alert("Generate Excel");
+    window.open(
+      `http://127.0.0.1:8000/export-excel?batch=${batch}`,
+      "_blank"
+    );
   };
     return (
     <Box sx={{ p: 4 }}>
