@@ -6,8 +6,13 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
-from models import Student, SemesterResult, Subject, Attendance
-from schemas import AttendanceCreate
+from models import User, Student, SemesterResult, Subject, Attendance
+
+from schemas import (
+    AttendanceCreate,
+    SignupRequest,
+    LoginRequest,
+)
 from datetime import date 
 from cgpa import (
     get_grade_point,
@@ -30,7 +35,78 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
+# ==========================================
+# Signup
+# ==========================================
+@app.post("/signup")
+def signup(user: SignupRequest):
 
+    db = SessionLocal()
+
+    existing = db.query(User).filter(
+        User.username == user.username
+    ).first()
+
+    if existing:
+        db.close()
+        raise HTTPException(
+            status_code=400,
+            detail="Username already exists"
+        )
+
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        register_number=user.register_number,
+        faculty_id=user.faculty_id,
+        department=user.department,
+        role=user.role,
+        password=user.password
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    db.close()
+
+    return {
+        "message": "Signup Successful"
+    }
+
+
+# ==========================================
+# Login
+# ==========================================
+@app.post("/login")
+def login(user: LoginRequest):
+
+    db = SessionLocal()
+
+    db_user = db.query(User).filter(
+        User.username == user.username
+    ).first()
+
+    if not db_user:
+        db.close()
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    if db_user.password != user.password:
+        db.close()
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect password"
+        )
+
+    db.close()
+
+    return {
+        "username": db_user.username,
+        "role": db_user.role,
+        "register_number": db_user.register_number
+    }
 
 @app.get("/")
 def home():
