@@ -5,8 +5,8 @@ function Attendance() {
 
   const [students, setStudents] = useState([]);
 
-  const [batch, setBatch] = useState("All");
-  const [section, setSection] = useState("All");
+  const [batch, setBatch] = useState("");
+  
   const [classBatch, setClassBatch] = useState("All");
   const [gender, setGender] = useState("All");
 
@@ -16,6 +16,9 @@ function Attendance() {
 
   const [attendance, setAttendance] = useState({});
 
+  const [saved, setSaved] = useState(false);
+  const [attendanceMessage, setAttendanceMessage] = useState(""); 
+
   const loadStudents = async () => {
 
     try {
@@ -23,13 +26,11 @@ function Attendance() {
       const response = await fetch("http://127.0.0.1:8000/students");
       let data = await response.json();
 
-      if (batch !== "All") {
-        data = data.filter(student => student.batch === batch);
-      }
+      if (batch !== "") {
+      data = data.filter(student => student.batch === batch);
+        }
 
-      if (section !== "All") {
-        data = data.filter(student => student.section === section);
-      }
+      
 
       if (classBatch !== "All") {
         data = data.filter(student => student.class_batch === classBatch);
@@ -56,6 +57,84 @@ function Attendance() {
     });
 
   };
+  const saveAttendance = async () => {
+
+  const present = students.filter(
+    s => attendance[s.id] === "Present"
+  );
+
+  const absent = students.filter(
+    s => attendance[s.id] === "Absent" || !attendance[s.id]
+  );
+
+  const od = students.filter(
+    s => attendance[s.id] === "OD"
+  );
+
+  const message =
+`📅 Attendance Report
+
+Date: ${attendanceDate}
+Batch: ${batch}
+
+✅ Present (${present.length})
+${present.map(s => `${s.register_number} - ${s.student_name}`).join("\n")}
+
+❌ Absent (${absent.length})
+${absent.map(s => `${s.register_number} - ${s.student_name}`).join("\n")}
+
+🟡 OD (${od.length})
+${od.map(s => `${s.register_number} - ${s.student_name}`).join("\n")}
+`;
+setAttendanceMessage(message);
+
+try {
+
+  for (const student of students) {
+
+    const status = attendance[student.id] || "Absent";
+
+    await fetch("http://127.0.0.1:8000/attendance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        student_id: student.id,
+        attendance_date: attendanceDate,
+        status: status,
+        marked_by: "Staff",
+      }),
+    });
+
+  }
+
+  setSaved(true);
+
+  alert("✅ Attendance Saved Successfully!");
+
+} catch (error) {
+
+  console.log(error);
+
+  alert("❌ Unable to save attendance.");
+
+}
+
+};
+
+const copyAttendance = async () => {
+
+  await navigator.clipboard.writeText(attendanceMessage);
+
+  alert("📋 Attendance Copied Successfully!");
+
+  window.open(
+    `https://web.whatsapp.com/send?text=${encodeURIComponent(attendanceMessage)}`,
+    "_blank"
+  );
+
+};
 
   return (
 
@@ -72,27 +151,15 @@ function Attendance() {
             value={batch}
             onChange={(e) => setBatch(e.target.value)}
           >
-            <option value="All">All</option>
+            <option value="">Select Batch</option>
             <option value="2023-2027">2023-2027</option>
             <option value="2024-2028">2024-2028</option>
+            <option value="2025-2029">2025-2029</option>
           </select>
 
         </div>
 
-        <div className="field">
-
-          <label>Section</label>
-
-          <select
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-          >
-            <option value="All">All</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-          </select>
-
-        </div>
+        
 
         <div className="field">
 
@@ -225,9 +292,15 @@ function Attendance() {
 
       <br />
 
-      <button className="load-btn">
+      <button className="load-btn" onClick={saveAttendance}>
         Save Attendance
       </button>
+
+      {saved && (
+      <button className="load-btn" onClick={copyAttendance} style={{ marginLeft: "15px" }}>
+       📋 Copy Attendance
+      </button>
+         )}
 
     </div>
 

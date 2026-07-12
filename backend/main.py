@@ -1,3 +1,4 @@
+from report import router as report_router
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,6 +7,7 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
+
 from models import User, Student, SemesterResult, Subject, Attendance
 
 from schemas import (
@@ -13,6 +15,9 @@ from schemas import (
     SignupRequest,
     LoginRequest,
 )
+
+
+
 from datetime import date 
 from cgpa import (
     get_grade_point,
@@ -35,9 +40,12 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
-# ==========================================
+
+app.include_router(report_router)
+
+# ---------------------------------------
 # Signup
-# ==========================================
+# ---------------------------------------
 @app.post("/signup")
 def signup(user: SignupRequest):
 
@@ -58,15 +66,15 @@ def signup(user: SignupRequest):
         username=user.username,
         email=user.email,
         register_number=user.register_number,
-        faculty_id=user.faculty_id,
         department=user.department,
-        role=user.role,
-        password=user.password
+        password=user.password,
+        role=user.role
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
     db.close()
 
     return {
@@ -74,47 +82,35 @@ def signup(user: SignupRequest):
     }
 
 
-# ==========================================
+# ---------------------------------------
 # Login
-# ==========================================
+# ---------------------------------------
 @app.post("/login")
-def login(user: LoginRequest):
+def login(login: LoginRequest):
 
     db = SessionLocal()
 
-    db_user = db.query(User).filter(
-        User.username == user.username
+    user = db.query(User).filter(
+        User.username == login.username,
+        User.password == login.password
     ).first()
 
-    if not db_user:
-        db.close()
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    if db_user.password != user.password:
+    if not user:
         db.close()
         raise HTTPException(
             status_code=401,
-            detail="Incorrect password"
+            detail="Invalid Username or Password"
         )
+
+    response = {
+        "username": user.username,
+        "role": user.role,
+        "register_number": user.register_number
+    }
 
     db.close()
 
-    return {
-        "username": db_user.username,
-        "role": db_user.role,
-        "register_number": db_user.register_number
-    }
-
-@app.get("/")
-def home():
-    return {
-        "message": "CGPA Calculator Backend Running Successfully"
-    }
-
-
+    return response
 # ---------------------------------------
 # Request Model
 # ---------------------------------------
@@ -124,12 +120,9 @@ class StudentUpdate(BaseModel):
     batch: str
     section: str
     gender: str
-    student_name: str
-    department: str
-    batch: str
-    section: str
-    gender: str
-    section: str
+
+
+
 
 
 # ---------------------------------------
