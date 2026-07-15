@@ -7,8 +7,17 @@ import os
 
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
-from models import Student, SemesterResult, Subject, Attendance, User
-from schemas import AttendanceCreate, SignupRequest, LoginRequest
+
+from models import User, Student, SemesterResult, Subject, Attendance
+
+from schemas import (
+    AttendanceCreate,
+    SignupRequest,
+    LoginRequest,
+)
+
+
+
 from datetime import date 
 from cgpa import (
     get_grade_point,
@@ -31,14 +40,8 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
+
 app.include_router(report_router)
-
-
-@app.get("/")
-def home():
-    return {
-        "message": "CGPA Calculator Backend Running Successfully"
-    }
 
 # ---------------------------------------
 # Signup
@@ -119,9 +122,7 @@ class StudentUpdate(BaseModel):
     gender: str
 
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+
 
 
 # ---------------------------------------

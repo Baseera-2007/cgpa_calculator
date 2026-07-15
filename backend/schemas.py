@@ -1,6 +1,41 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
+# ==========================================
+# Signup
+# ==========================================
+
+class SignupRequest(BaseModel):
+    username: str
+    department: str
+
+    role: str
+
+    register_number: Optional[str] = None
+    faculty_id: Optional[str] = None
+
+    batch: Optional[str] = None
+    section: Optional[str] = None
+    gender: Optional[str] = None
+
+    email: Optional[str] = None
+
+    password: str
+
+
+# ==========================================
+# Login
+# ==========================================
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+# ==========================================
+# Attendance
+# ==========================================
 
 # ----------------------------
 # Login
