@@ -64,7 +64,7 @@ def signup(user: SignupRequest):
 
     new_user = User(
         username=user.username,
-        email=user.email,
+        email=user.email if user.email else None,
         register_number=user.register_number,
         department=user.department,
         password=user.password,
