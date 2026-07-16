@@ -51,6 +51,7 @@ def signup(user: SignupRequest):
 
     db = SessionLocal()
 
+    # Check Username
     existing = db.query(User).filter(
         User.username == user.username
     ).first()
@@ -62,25 +63,54 @@ def signup(user: SignupRequest):
             detail="Username already exists"
         )
 
+    # Save User
     new_user = User(
         username=user.username,
         email=user.email if user.email else None,
         register_number=user.register_number,
+        faculty_id=user.faculty_id,
         department=user.department,
         password=user.password,
-        role=user.role
+        role=user.role,
+        batch=user.batch,
+        section=user.section,
+        gender=user.gender
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
+    # --------------------------------------------------
+    # If Student -> Create Student Table Record
+    # --------------------------------------------------
+    if user.role == "student":
+
+        existing_student = db.query(Student).filter(
+            Student.register_number == user.register_number
+        ).first()
+
+        if not existing_student:
+
+            new_student = Student(
+                register_number=user.register_number,
+                student_name=user.username,
+                department=user.department,
+                batch=user.batch,
+                section=user.section,
+                gender=user.gender,
+                current_semester=0,
+                current_cgpa=0.00
+            )
+
+            db.add(new_student)
+            db.commit()
+
     db.close()
 
     return {
         "message": "Signup Successful"
     }
-
 
 # ---------------------------------------
 # Login
@@ -139,6 +169,9 @@ async def upload_pdf(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     data = parse_pdf(file_path)
+    print("========== PDF DATA ==========")
+    print(data)
+    print("==============================")
 
     if "error" in data:
         raise HTTPException(
@@ -168,20 +201,13 @@ async def upload_pdf(file: UploadFile = File(...)):
     ).first()
 
     if not student:
-        student = Student(
-    register_number=data["register_number"],
-    student_name=data["student_name"],
-    department=data["department"],
-    batch="2023-2027",
-    section="A",
-    gender="Female",
-    current_semester=int(data["semester"]),
-    current_cgpa=sgpa
-)
 
-        db.add(student)
-        db.commit()
-        db.refresh(student)
+        db.close()
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found. Please signup first."
+        )
 
     existing = db.query(SemesterResult).filter(
         SemesterResult.student_id == student.id,

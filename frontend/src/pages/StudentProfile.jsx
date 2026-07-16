@@ -28,6 +28,8 @@ function StudentProfile() {
     const response = await fetch("http://127.0.0.1:8000/students");
 
     const students = await response.json();
+    console.log("All Students:", students);
+    console.log("Register Number from Login:", registerNumber);
 
     const currentStudent = students.find(
       (s) => s.register_number === registerNumber
@@ -41,6 +43,8 @@ function StudentProfile() {
     );
 
     const data = await response2.json();
+    console.log("Student Details:", data);
+    console.log("Semester Results:", data.semester_results);
 
     setStudent(data);
   };
