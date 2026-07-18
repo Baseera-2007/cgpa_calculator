@@ -46,51 +46,95 @@ app.include_router(report_router)
 # ---------------------------------------
 # Signup
 # ---------------------------------------
+# ---------------------------------------
+# Signup
+# ---------------------------------------
 @app.post("/signup")
 def signup(user: SignupRequest):
 
     db = SessionLocal()
 
-    # Check Username
-    existing = db.query(User).filter(
-        User.username == user.username
-    ).first()
+    try:
 
-    if existing:
-        db.close()
-        raise HTTPException(
-            status_code=400,
-            detail="Username already exists"
-        )
-
-    # Save User
-    new_user = User(
-        username=user.username,
-        email=user.email if user.email else None,
-        register_number=user.register_number,
-        faculty_id=user.faculty_id,
-        department=user.department,
-        password=user.password,
-        role=user.role,
-        batch=user.batch,
-        section=user.section,
-        gender=user.gender
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    # --------------------------------------------------
-    # If Student -> Create Student Table Record
-    # --------------------------------------------------
-    if user.role == "student":
-
-        existing_student = db.query(Student).filter(
-            Student.register_number == user.register_number
+        # -----------------------------
+        # Username already exists?
+        # -----------------------------
+        existing = db.query(User).filter(
+            User.username == user.username
         ).first()
 
-        if not existing_student:
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail="Username already exists"
+            )
+
+        # -----------------------------
+        # Student Validation
+        # -----------------------------
+        if user.role == "student":
+
+            if not user.register_number:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Register Number is required."
+                )
+
+            existing_student = db.query(Student).filter(
+                Student.register_number == user.register_number
+            ).first()
+
+            if existing_student:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Student already registered."
+                )
+
+        # -----------------------------
+        # Staff Validation
+        # -----------------------------
+        elif user.role == "staff":
+
+            if not user.faculty_id:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Faculty ID is required."
+                )
+
+            existing_staff = db.query(User).filter(
+                User.faculty_id == user.faculty_id
+            ).first()
+
+            if existing_staff:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Faculty ID already exists."
+                )
+
+        # -----------------------------
+        # Save User
+        # -----------------------------
+        new_user = User(
+            username=user.username,
+            email=user.email,
+            register_number=user.register_number,
+            faculty_id=user.faculty_id,
+            department=user.department,
+            password=user.password,
+            role=user.role,
+            batch=user.batch,
+            section=user.section,
+            gender=user.gender
+        )
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        # -----------------------------
+        # Student Table
+        # -----------------------------
+        if user.role == "student":
 
             new_student = Student(
                 register_number=user.register_number,
@@ -100,17 +144,31 @@ def signup(user: SignupRequest):
                 section=user.section,
                 gender=user.gender,
                 current_semester=0,
-                current_cgpa=0.00
+                current_cgpa=0.0
             )
 
             db.add(new_student)
             db.commit()
 
-    db.close()
+        return {
+            "message": "Signup Successful"
+        }
 
-    return {
-        "message": "Signup Successful"
-    }
+    except HTTPException as e:
+        db.rollback()
+        raise e
+
+    except Exception as e:
+        db.rollback()
+        print("SIGNUP ERROR :", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+    finally:
+        db.close()
 
 # ---------------------------------------
 # Login
