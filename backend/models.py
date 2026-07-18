@@ -136,3 +136,19 @@ class Attendance(Base):
     marked_by = Column(String)
 
     student = relationship("Student")
+# ==========================================
+# Assigned Subjects
+# ==========================================
+
+class AssignedSubject(Base):
+    __tablename__ = "assigned_subjects"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    batch = Column(String(50), nullable=False)
+
+    semester = Column(Integer, nullable=False)
+
+    subject_code = Column(String(20), nullable=False)
+
+    subject_name = Column(String(200), nullable=False)

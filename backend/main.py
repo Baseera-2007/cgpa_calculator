@@ -1,3 +1,4 @@
+from subjects_master import SUBJECTS
 from report import router as report_router
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +9,14 @@ import os
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
 
-from models import User, Student, SemesterResult, Subject, Attendance
+from models import User, Student, SemesterResult, Subject, Attendance, AssignedSubject
 
 from schemas import (
     AttendanceCreate,
     SignupRequest,
     LoginRequest,
+    AssignedSubjectCreate,
+    AssignedSubjectResponse,
 )
 
 
@@ -535,3 +538,94 @@ def get_attendance(attendance_date: date):
 
     return result  
 # test
+# ==========================================
+# ADD SUBJECT
+# ==========================================
+@app.post("/assigned-subjects")
+def add_subject(subject: AssignedSubjectCreate):
+
+    db = SessionLocal()
+
+    existing = db.query(AssignedSubject).filter(
+        AssignedSubject.batch == subject.batch,
+        AssignedSubject.semester == subject.semester,
+        AssignedSubject.subject_code == subject.subject_code
+    ).first()
+
+    if existing:
+        db.close()
+        raise HTTPException(
+            status_code=400,
+            detail="Subject already exists."
+        )
+
+    new_subject = AssignedSubject(
+        batch=subject.batch,
+        semester=subject.semester,
+        subject_code=subject.subject_code,
+        subject_name=subject.subject_name
+    )
+
+    db.add(new_subject)
+    db.commit()
+
+    db.close()
+
+    return {
+        "message": "Subject added successfully."
+    }
+
+
+# ==========================================
+# GET SUBJECTS
+# ==========================================
+@app.get("/assigned-subjects")
+def get_subjects(batch: str, semester: int):
+
+    db = SessionLocal()
+
+    subjects = db.query(AssignedSubject).filter(
+        AssignedSubject.batch == batch,
+        AssignedSubject.semester == semester
+    ).all()
+
+    db.close()
+
+    return subjects
+
+
+# ==========================================
+# DELETE SUBJECT
+# ==========================================
+@app.delete("/assigned-subjects/{subject_id}")
+def delete_subject(subject_id: int):
+
+    db = SessionLocal()
+
+    subject = db.query(AssignedSubject).filter(
+        AssignedSubject.id == subject_id
+    ).first()
+
+    if not subject:
+        db.close()
+        raise HTTPException(
+            status_code=404,
+            detail="Subject not found."
+        )
+
+    db.delete(subject)
+    db.commit()
+
+    db.close()
+
+    return {
+        "message": "Subject deleted successfully."
+    }
+    
+@app.get("/subjects/{semester}")
+def get_subjects(semester: int):
+
+    if semester not in SUBJECTS:
+        return []
+
+    return SUBJECTS[semester]

@@ -52,3 +52,33 @@ class AttendanceResponse(BaseModel):
 
     class Config:
         from_attributes = True
+# ==========================================
+# Assigned Subjects
+# ==========================================
+
+class AssignedSubjectCreate(BaseModel):
+    batch: str
+    semester: int
+    subject_code: str
+    subject_name: str
+
+
+class AssignedSubjectResponse(BaseModel):
+    id: int
+    batch: str
+    semester: int
+    subject_code: str
+    subject_name: str
+
+    class Config:
+        from_attributes = True
+
+# ==========================================
+# Assigned Subjects
+# ==========================================
+
+class AssignedSubjectCreate(BaseModel):
+    batch: str
+    semester: int
+    subject_code: str
+    subject_name: str
