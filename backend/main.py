@@ -252,8 +252,21 @@ async def upload_pdf(file: UploadFile = File(...)):
     for subject in data["subjects"]:
         subject["credit"] = get_credit(subject["code"])
         subject["grade_point"] = get_grade_point(subject["grade"])
+    print("\n========== SUBJECT DETAILS ==========")
+
+    for s in data["subjects"]:
+        print(
+           f"{s['code']} | "
+           f"Grade={s['grade']} | "
+           f"GP={s['grade_point']} | "
+           f"Credit={s['credit']} | "
+           f"CP={s['grade_point'] * s['credit']}"
+        )
+
+    print("=====================================\n")
 
     sgpa = calculate_gpa(data["subjects"])
+    print("Calculated SGPA =", sgpa)
 
     db = SessionLocal()
 
@@ -369,7 +382,7 @@ def get_student(student_id: int):
         "batch": student.batch,
         "section": student.section,
         "current_semester": student.current_semester,
-        "current_cgpa": float(student.current_cgpa),
+        "current_cgpa": float(student.current_cgpa) if student.current_cgpa is not None else 0.0,
         "semester_results": []
     }
 
@@ -377,7 +390,7 @@ def get_student(student_id: int):
 
         sem = {
             "semester": semester.semester,
-            "sgpa": float(semester.sgpa),
+            "sgpa": float(semester.sgpa) if semester.sgpa is not None else 0.0,
             "result_pdf": semester.result_pdf,
             "subjects": []
         }

@@ -53,7 +53,7 @@ class Student(Base):
 
     # CGPA Details
     current_semester = Column(Integer)
-    current_cgpa = Column(DECIMAL(4, 2))
+    current_cgpa = Column(DECIMAL(6, 3))
 
     semester_results = relationship(
         "SemesterResult",
@@ -74,7 +74,7 @@ class SemesterResult(Base):
 
     semester = Column(Integer)
 
-    sgpa = Column(DECIMAL(4, 2))
+    sgpa = Column(DECIMAL(6, 3))
 
     result_pdf = Column(String)
 
