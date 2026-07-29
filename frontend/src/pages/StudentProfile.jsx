@@ -6,6 +6,16 @@ import {
   Box,
   Avatar,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
 } from "@mui/material";
 
 import PersonIcon from "@mui/icons-material/Person";
@@ -15,6 +25,10 @@ import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 function StudentProfile() {
 
   const [student, setStudent] = useState(null);
+
+const [openSGPA, setOpenSGPA] = useState(false);
+const [openBacklogs, setOpenBacklogs] = useState(false);
+const [selectedSemester, setSelectedSemester] = useState(null);
 
   const registerNumber = localStorage.getItem("register_number");
 
@@ -28,6 +42,8 @@ function StudentProfile() {
     const response = await fetch("http://127.0.0.1:8000/students");
 
     const students = await response.json();
+    console.log("All Students:", students);
+    console.log("Register Number from Login:", registerNumber);
 
     const currentStudent = students.find(
       (s) => s.register_number === registerNumber
@@ -41,6 +57,8 @@ function StudentProfile() {
     );
 
     const data = await response2.json();
+    console.log("Student Details:", data);
+    console.log("Semester Results:", data.semester_results);
 
     setStudent(data);
   };
@@ -106,7 +124,7 @@ function StudentProfile() {
             fontWeight: "bold",
             color: "#FFD54F",
             }}>
-            CGPA : {student.current_cgpa}
+            CGPA : {Number(student.current_cgpa).toFixed(3)}
           </Typography>
         </Grid>
       </Grid>
@@ -183,16 +201,62 @@ function StudentProfile() {
             </Box>
 
             {result ? (
-              <Chip
-                label={`SGPA : ${result.sgpa}`}
-                color="success"
-              />
-            ) : (
-              <Chip
-                label="Not Uploaded"
-                color="default"
-              />
-            )}
+  <Box
+    sx={{
+      display: "flex",
+      gap: 1,
+      alignItems: "center",
+    }}
+  >
+    <Button
+      variant="contained"
+      color="success"
+      onClick={() => {
+        setSelectedSemester(result);
+        setOpenSGPA(true);
+      }}
+      sx={{
+        borderRadius: 5,
+        textTransform: "none",
+        fontWeight: "bold",
+      }}
+    >
+      SGPA : {Number(result.sgpa).toFixed(3)}
+    </Button>
+
+    <Button
+      variant="contained"
+      color="error"
+      onClick={() => {
+        setSelectedSemester(result);
+        setOpenBacklogs(true);
+      }}
+      sx={{
+        borderRadius: 5,
+        textTransform: "none",
+        fontWeight: "bold",
+      }}
+    >
+      Backlogs : {
+        result.subjects.filter((sub) => {
+  const grade = sub.grade?.trim().toUpperCase();
+
+  return (
+    grade === "RA" ||
+    grade === "U" ||
+    grade === "F" ||
+    grade === "FAIL"
+  );
+}).length
+      }
+    </Button>
+  </Box>
+) : (
+  <Chip
+    label="Not Uploaded"
+    color="default"
+  />
+)}
 
           </Paper>
         );
@@ -200,7 +264,207 @@ function StudentProfile() {
       })}
 
     </Paper>
-  </Box>
+
+<Dialog
+open={openSGPA}
+onClose={() => setOpenSGPA(false)}
+maxWidth="md"
+fullWidth
+>
+
+<DialogTitle>
+
+Semester {selectedSemester?.semester} Grade Details
+
+</DialogTitle>
+
+<DialogContent>
+
+<Table>
+
+<TableHead
+  sx={{
+    "& .MuiTableCell-head": {
+      backgroundColor: "#2563eb",
+      color: "#ffffff",
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+  }}
+>
+
+<TableRow>
+
+<TableCell><b>Subject Code</b></TableCell>
+
+<TableCell><b>Subject Name</b></TableCell>
+
+<TableCell><b>Grade</b></TableCell>
+
+</TableRow>
+
+</TableHead>
+
+<TableBody>
+
+{selectedSemester?.subjects.map((sub,index)=>(
+
+<TableRow key={index}>
+
+<TableCell>{sub.subject_code}</TableCell>
+
+<TableCell>{sub.subject_name}</TableCell>
+
+<TableCell>{sub.grade}</TableCell>
+
+</TableRow>
+
+))}
+
+</TableBody>
+
+</Table>
+
+</DialogContent>
+
+<DialogActions>
+
+<Button
+  variant="contained"
+  color="error"
+  onClick={() => setOpenSGPA(false)}
+  sx={{
+    borderRadius: 2,
+    px: 3,
+    textTransform: "none",
+    fontWeight: "bold",
+  }}
+>
+  Close
+</Button>
+
+</DialogActions>
+
+</Dialog>
+
+<Dialog
+open={openBacklogs}
+onClose={()=>setOpenBacklogs(false)}
+maxWidth="md"
+fullWidth
+>
+
+<DialogTitle>
+
+Backlog Details
+
+</DialogTitle>
+
+<DialogContent>
+
+<Table>
+
+<TableHead
+  sx={{
+    "& .MuiTableCell-head": {
+      backgroundColor: "#2563eb",
+      color: "#ffffff",
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+  }}
+>
+
+
+<TableRow>
+
+<TableCell><b>Subject Code</b></TableCell>
+
+<TableCell><b>Subject Name</b></TableCell>
+
+<TableCell><b>Status</b></TableCell>
+
+</TableRow>
+
+</TableHead>
+
+<TableBody>
+
+{selectedSemester?.subjects
+.filter((sub) => {
+  const grade = sub.grade?.trim().toUpperCase();
+
+  return (
+    grade === "RA" ||
+    grade === "U" ||
+    grade === "F" ||
+    grade === "FAIL"
+  );
+})
+.length===0 ? (
+
+<TableRow>
+
+<TableCell colSpan={3} align="center">
+
+No Backlogs Found 🎉
+
+</TableCell>
+
+</TableRow>
+
+) : (
+
+selectedSemester?.subjects
+.filter(
+sub =>
+sub.grade==="RA" ||
+sub.grade==="U" ||
+sub.grade==="F"
+)
+.map((sub,index)=>(
+
+<TableRow key={index}>
+
+<TableCell>{sub.subject_code}</TableCell>
+
+<TableCell>{sub.subject_name}</TableCell>
+
+<TableCell>{sub.grade}</TableCell>
+
+</TableRow>
+
+))
+
+)}
+
+</TableBody>
+
+</Table>
+
+</DialogContent>
+
+<DialogActions>
+
+<Button
+  variant="contained"
+  color="error"
+  onClick={() => setOpenBacklogs(false)}
+  sx={{
+    borderRadius: 2,
+    px: 3,
+    textTransform: "none",
+    fontWeight: "bold",
+  }}
+>
+  Close
+</Button>
+
+</DialogActions>
+
+</Dialog>
+
+</Box>
 );
 }
 

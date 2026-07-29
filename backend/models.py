@@ -2,6 +2,10 @@ from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from database import Base
 
+
+# ==========================================
+# User Table
+# ==========================================
 class User(Base):
     __tablename__ = "users"
 
@@ -13,11 +17,19 @@ class User(Base):
 
     register_number = Column(String, unique=True, nullable=True)
 
+    faculty_id = Column(String, unique=True, nullable=True)
+
     department = Column(String)
 
     password = Column(String, nullable=False)
 
     role = Column(String, default="student")
+
+    # Student Details
+    batch = Column(String, nullable=True)
+    section = Column(String, nullable=True)
+    gender = Column(String, nullable=True)
+
 
 # ==========================================
 # Student Table
@@ -26,19 +38,22 @@ class Student(Base):
     __tablename__ = "students"
 
     id = Column(Integer, primary_key=True, index=True)
+
     register_number = Column(String, unique=True, nullable=False)
+
     student_name = Column(String, nullable=False)
+
     department = Column(String)
 
     # Academic Details
     batch = Column(String)
     section = Column(String)
-    class_batch = Column(String)      # Batch I / Batch II
+    class_batch = Column(String)
     gender = Column(String)
 
     # CGPA Details
     current_semester = Column(Integer)
-    current_cgpa = Column(DECIMAL(4, 2))
+    current_cgpa = Column(DECIMAL(6, 3))
 
     semester_results = relationship(
         "SemesterResult",
@@ -54,9 +69,13 @@ class SemesterResult(Base):
     __tablename__ = "semester_results"
 
     id = Column(Integer, primary_key=True, index=True)
+
     student_id = Column(Integer, ForeignKey("students.id"))
+
     semester = Column(Integer)
-    sgpa = Column(DECIMAL(4, 2))
+
+    sgpa = Column(DECIMAL(6, 3))
+
     result_pdf = Column(String)
 
     student = relationship(
@@ -78,11 +97,20 @@ class Subject(Base):
     __tablename__ = "subjects"
 
     id = Column(Integer, primary_key=True, index=True)
-    semester_result_id = Column(Integer, ForeignKey("semester_results.id"))
+
+    semester_result_id = Column(
+        Integer,
+        ForeignKey("semester_results.id")
+    )
+
     subject_code = Column(String)
+
     subject_name = Column(String)
+
     grade = Column(String)
+
     credit = Column(Integer)
+
     grade_point = Column(Integer)
 
     semester_result = relationship(
@@ -98,9 +126,29 @@ class Attendance(Base):
     __tablename__ = "attendance"
 
     id = Column(Integer, primary_key=True, index=True)
+
     student_id = Column(Integer, ForeignKey("students.id"))
+
     attendance_date = Column(Date)
-    status = Column(String)          # Present / Absent / OD
-    marked_by = Column(String)       # Teacher Name
+
+    status = Column(String)
+
+    marked_by = Column(String)
 
     student = relationship("Student")
+# ==========================================
+# Assigned Subjects
+# ==========================================
+
+class AssignedSubject(Base):
+    __tablename__ = "assigned_subjects"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    batch = Column(String(50), nullable=False)
+
+    semester = Column(Integer, nullable=False)
+
+    subject_code = Column(String(20), nullable=False)
+
+    subject_name = Column(String(200), nullable=False)

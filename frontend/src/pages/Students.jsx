@@ -23,11 +23,15 @@ import {
   Grid,
   Avatar,
   Divider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 function Students() {
 
@@ -352,19 +356,39 @@ function Students() {
 
                     {result ? (
 
-                      <Chip
-                        label={`SGPA : ${result.sgpa}`}
-                        color="success"
-                      />
+  <Box
+    sx={{
+      display: "flex",
+      gap: 1,
+    }}
+  >
 
-                    ) : (
+    <Chip
+      label={`SGPA : ${Number(result.sgpa).toFixed(3)}`}
+      color="success"
+    />
 
-                      <Chip
-                        label="Not Uploaded"
-                        color="default"
-                      />
+    <Chip
+  label={`Backlogs : ${
+    result.subjects.filter(
+      (sub) =>
+        sub.grade === "RA" ||
+        sub.grade === "U"
+    ).length
+  }`}
+  color="error"
+/>
 
-                    )}
+  </Box>
+
+) : (
+
+  <Chip
+    label="Not Uploaded"
+    color="default"
+  />
+
+)}
 
                   </Paper>
 

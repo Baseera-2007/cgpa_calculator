@@ -19,7 +19,6 @@ function SignupForm() {
   const [formData, setFormData] = useState({
     username: "",
     department: "",
-
     role: "",
 
     registerNumber: "",
@@ -50,45 +49,66 @@ function SignupForm() {
       return;
     }
 
-    const response = await fetch(
-      "http://127.0.0.1:8000/signup",
-      {
-        method: "POST",
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+          body: JSON.stringify({
+            username: formData.username,
+            department: formData.department,
+            role: formData.role,
 
-        body: JSON.stringify({
-          username: formData.username,
-          department: formData.department,
+            register_number:
+              formData.role === "student"
+                ? formData.registerNumber
+                : null,
 
-          role: formData.role,
+            faculty_id:
+              formData.role === "staff"
+                ? formData.facultyId
+                : null,
 
-          register_number: formData.registerNumber,
+            batch:
+              formData.role === "student"
+                ? formData.batch
+                : null,
 
-          faculty_id: formData.facultyId,
+            section:
+              formData.role === "student"
+                ? formData.section
+                : null,
 
-          batch: formData.batch,
+            gender:
+              formData.role === "student"
+                ? formData.gender
+                : null,
 
-          section: formData.section,
+            email:
+              formData.role === "staff"
+                ? formData.email
+                : null,
 
-          gender: formData.gender,
+            password: formData.password,
+          }),
+        }
+      );
 
-          email: formData.email,
+      const data = await response.json();
 
-          password: formData.password,
-        }),
+      if (response.ok) {
+        alert("Signup Successful 🎉");
+        navigate("/");
+      } else {
+        alert(data.detail);
       }
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert("Signup Successful");
-      navigate("/");
-    } else {
-      alert(data.detail);
+    } catch (err) {
+      console.log(err);
+      alert("Server Error");
     }
   };
 
@@ -114,7 +134,6 @@ function SignupForm() {
       </Typography>
 
       <Box component="form" onSubmit={handleSignup}>
-
         <FormControl fullWidth margin="normal">
           <InputLabel>Register As</InputLabel>
 
@@ -128,14 +147,9 @@ function SignupForm() {
               <em>Select Role</em>
             </MenuItem>
 
-            <MenuItem value="student">
-              Student
-            </MenuItem>
+            <MenuItem value="student">Student</MenuItem>
 
-            <MenuItem value="staff">
-              Staff
-            </MenuItem>
-
+            <MenuItem value="staff">Staff</MenuItem>
           </Select>
         </FormControl>
 
@@ -156,11 +170,9 @@ function SignupForm() {
           value={formData.department}
           onChange={handleChange}
         />
-                {/* Student Fields */}
 
         {formData.role === "student" && (
           <>
-
             <TextField
               fullWidth
               margin="normal"
@@ -183,18 +195,9 @@ function SignupForm() {
                   <em>Select Batch</em>
                 </MenuItem>
 
-                <MenuItem value="2023-2027">
-                  2023-2027
-                </MenuItem>
-
-                <MenuItem value="2024-2028">
-                  2024-2028
-                </MenuItem>
-
-                <MenuItem value="2025-2029">
-                  2025-2029
-                </MenuItem>
-
+                <MenuItem value="2023-2027">2023-2027</MenuItem>
+                <MenuItem value="2024-2028">2024-2028</MenuItem>
+                <MenuItem value="2025-2029">2025-2029</MenuItem>
               </Select>
             </FormControl>
 
@@ -211,14 +214,8 @@ function SignupForm() {
                   <em>Select Lab Batch</em>
                 </MenuItem>
 
-                <MenuItem value="Batch 1">
-                  Batch 1
-                </MenuItem>
-
-                <MenuItem value="Batch 2">
-                  Batch 2
-                </MenuItem>
-
+                <MenuItem value="Batch 1">Batch 1</MenuItem>
+                <MenuItem value="Batch 2">Batch 2</MenuItem>
               </Select>
             </FormControl>
 
@@ -235,29 +232,16 @@ function SignupForm() {
                   <em>Select Gender</em>
                 </MenuItem>
 
-                <MenuItem value="Male">
-                  Male
-                </MenuItem>
-
-                <MenuItem value="Female">
-                  Female
-                </MenuItem>
-
-                <MenuItem value="Other">
-                  Other
-                </MenuItem>
-
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Female">Female</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
               </Select>
             </FormControl>
-
           </>
         )}
 
-        {/* Staff Fields */}
-
         {formData.role === "staff" && (
           <>
-
             <TextField
               fullWidth
               margin="normal"
@@ -276,7 +260,6 @@ function SignupForm() {
               value={formData.email}
               onChange={handleChange}
             />
-
           </>
         )}
 
@@ -316,18 +299,11 @@ function SignupForm() {
           Sign Up
         </Button>
 
-        <Typography
-          align="center"
-          sx={{ mt: 3 }}
-        >
+        <Typography align="center" sx={{ mt: 3 }}>
           Already have an account?{" "}
-          <Link to="/">
-            Sign In
-          </Link>
+          <Link to="/">Sign In</Link>
         </Typography>
-
       </Box>
-
     </Paper>
   );
 }

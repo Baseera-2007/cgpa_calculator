@@ -22,12 +22,19 @@ function Sidebar() {
                 👨‍🎓 Students
               </NavLink>
             </li>
+
+            <li>
+              <NavLink to="/staff/my-subjects">
+                📘 My Subjects
+              </NavLink>
+            </li>
+
             <li>
               <NavLink to="/staff/attendance">
                 📝 Attendance
               </NavLink>
             </li>
-            
+
             <li>
               <NavLink to="/staff/reports">
                 📄 Reports

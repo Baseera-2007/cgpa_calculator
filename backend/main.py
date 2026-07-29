@@ -1,3 +1,4 @@
+from subjects_master import SUBJECTS
 from report import router as report_router
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +9,14 @@ import os
 from parser import parse_pdf
 from database import SessionLocal, engine, Base
 
-from models import User, Student, SemesterResult, Subject, Attendance
+from models import User, Student, SemesterResult, Subject, Attendance, AssignedSubject
 
 from schemas import (
     AttendanceCreate,
     SignupRequest,
     LoginRequest,
+    AssignedSubjectCreate,
+    AssignedSubjectResponse,
 )
 
 
@@ -46,41 +49,129 @@ app.include_router(report_router)
 # ---------------------------------------
 # Signup
 # ---------------------------------------
+# ---------------------------------------
+# Signup
+# ---------------------------------------
 @app.post("/signup")
 def signup(user: SignupRequest):
 
     db = SessionLocal()
 
-    existing = db.query(User).filter(
-        User.username == user.username
-    ).first()
+    try:
 
-    if existing:
-        db.close()
-        raise HTTPException(
-            status_code=400,
-            detail="Username already exists"
+        # -----------------------------
+        # Username already exists?
+        # -----------------------------
+        existing = db.query(User).filter(
+            User.username == user.username
+        ).first()
+
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail="Username already exists"
+            )
+
+        # -----------------------------
+        # Student Validation
+        # -----------------------------
+        if user.role == "student":
+
+            if not user.register_number:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Register Number is required."
+                )
+
+            existing_student = db.query(Student).filter(
+                Student.register_number == user.register_number
+            ).first()
+
+            if existing_student:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Student already registered."
+                )
+
+        # -----------------------------
+        # Staff Validation
+        # -----------------------------
+        elif user.role == "staff":
+
+            if not user.faculty_id:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Faculty ID is required."
+                )
+
+            existing_staff = db.query(User).filter(
+                User.faculty_id == user.faculty_id
+            ).first()
+
+            if existing_staff:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Faculty ID already exists."
+                )
+
+        # -----------------------------
+        # Save User
+        # -----------------------------
+        new_user = User(
+            username=user.username,
+            email=user.email,
+            register_number=user.register_number,
+            faculty_id=user.faculty_id,
+            department=user.department,
+            password=user.password,
+            role=user.role,
+            batch=user.batch,
+            section=user.section,
+            gender=user.gender
         )
 
-    new_user = User(
-        username=user.username,
-        email=user.email,
-        register_number=user.register_number,
-        department=user.department,
-        password=user.password,
-        role=user.role
-    )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+        # -----------------------------
+        # Student Table
+        # -----------------------------
+        if user.role == "student":
 
-    db.close()
+            new_student = Student(
+                register_number=user.register_number,
+                student_name=user.username,
+                department=user.department,
+                batch=user.batch,
+                section=user.section,
+                gender=user.gender,
+                current_semester=0,
+                current_cgpa=0.0
+            )
 
-    return {
-        "message": "Signup Successful"
-    }
+            db.add(new_student)
+            db.commit()
 
+        return {
+            "message": "Signup Successful"
+        }
+
+    except HTTPException as e:
+        db.rollback()
+        raise e
+
+    except Exception as e:
+        db.rollback()
+        print("SIGNUP ERROR :", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+    finally:
+        db.close()
 
 # ---------------------------------------
 # Login
@@ -139,6 +230,9 @@ async def upload_pdf(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     data = parse_pdf(file_path)
+    print("========== PDF DATA ==========")
+    print(data)
+    print("==============================")
 
     if "error" in data:
         raise HTTPException(
@@ -158,8 +252,21 @@ async def upload_pdf(file: UploadFile = File(...)):
     for subject in data["subjects"]:
         subject["credit"] = get_credit(subject["code"])
         subject["grade_point"] = get_grade_point(subject["grade"])
+    print("\n========== SUBJECT DETAILS ==========")
+
+    for s in data["subjects"]:
+        print(
+           f"{s['code']} | "
+           f"Grade={s['grade']} | "
+           f"GP={s['grade_point']} | "
+           f"Credit={s['credit']} | "
+           f"CP={s['grade_point'] * s['credit']}"
+        )
+
+    print("=====================================\n")
 
     sgpa = calculate_gpa(data["subjects"])
+    print("Calculated SGPA =", sgpa)
 
     db = SessionLocal()
 
@@ -168,20 +275,13 @@ async def upload_pdf(file: UploadFile = File(...)):
     ).first()
 
     if not student:
-        student = Student(
-    register_number=data["register_number"],
-    student_name=data["student_name"],
-    department=data["department"],
-    batch="2023-2027",
-    section="A",
-    gender="Female",
-    current_semester=int(data["semester"]),
-    current_cgpa=sgpa
-)
 
-        db.add(student)
-        db.commit()
-        db.refresh(student)
+        db.close()
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found. Please signup first."
+        )
 
     existing = db.query(SemesterResult).filter(
         SemesterResult.student_id == student.id,
@@ -282,7 +382,7 @@ def get_student(student_id: int):
         "batch": student.batch,
         "section": student.section,
         "current_semester": student.current_semester,
-        "current_cgpa": float(student.current_cgpa),
+        "current_cgpa": float(student.current_cgpa) if student.current_cgpa is not None else 0.0,
         "semester_results": []
     }
 
@@ -290,7 +390,7 @@ def get_student(student_id: int):
 
         sem = {
             "semester": semester.semester,
-            "sgpa": float(semester.sgpa),
+            "sgpa": float(semester.sgpa) if semester.sgpa is not None else 0.0,
             "result_pdf": semester.result_pdf,
             "subjects": []
         }
@@ -451,3 +551,94 @@ def get_attendance(attendance_date: date):
 
     return result  
 # test
+# ==========================================
+# ADD SUBJECT
+# ==========================================
+@app.post("/assigned-subjects")
+def add_subject(subject: AssignedSubjectCreate):
+
+    db = SessionLocal()
+
+    existing = db.query(AssignedSubject).filter(
+        AssignedSubject.batch == subject.batch,
+        AssignedSubject.semester == subject.semester,
+        AssignedSubject.subject_code == subject.subject_code
+    ).first()
+
+    if existing:
+        db.close()
+        raise HTTPException(
+            status_code=400,
+            detail="Subject already exists."
+        )
+
+    new_subject = AssignedSubject(
+        batch=subject.batch,
+        semester=subject.semester,
+        subject_code=subject.subject_code,
+        subject_name=subject.subject_name
+    )
+
+    db.add(new_subject)
+    db.commit()
+
+    db.close()
+
+    return {
+        "message": "Subject added successfully."
+    }
+
+
+# ==========================================
+# GET SUBJECTS
+# ==========================================
+@app.get("/assigned-subjects")
+def get_subjects(batch: str, semester: int):
+
+    db = SessionLocal()
+
+    subjects = db.query(AssignedSubject).filter(
+        AssignedSubject.batch == batch,
+        AssignedSubject.semester == semester
+    ).all()
+
+    db.close()
+
+    return subjects
+
+
+# ==========================================
+# DELETE SUBJECT
+# ==========================================
+@app.delete("/assigned-subjects/{subject_id}")
+def delete_subject(subject_id: int):
+
+    db = SessionLocal()
+
+    subject = db.query(AssignedSubject).filter(
+        AssignedSubject.id == subject_id
+    ).first()
+
+    if not subject:
+        db.close()
+        raise HTTPException(
+            status_code=404,
+            detail="Subject not found."
+        )
+
+    db.delete(subject)
+    db.commit()
+
+    db.close()
+
+    return {
+        "message": "Subject deleted successfully."
+    }
+    
+@app.get("/subjects/{semester}")
+def get_subjects(semester: int):
+
+    if semester not in SUBJECTS:
+        return []
+
+    return SUBJECTS[semester]
