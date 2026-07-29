@@ -12,7 +12,10 @@ GRADE_POINTS = {
 
 
 def get_grade_point(grade):
-    return GRADE_POINTS.get(grade.upper(), 0)
+    return GRADE_POINTS.get(
+        grade.upper(),
+        0
+    )
 
 
 SUBJECT_CREDITS = {
@@ -30,6 +33,7 @@ SUBJECT_CREDITS = {
     "R21UEE128": 1,
     "R21UPH113": 1,
 
+
     # ---------- Semester 2 ----------
     "R21UAC231": 0,
     "R21UMA208": 4,
@@ -42,6 +46,7 @@ SUBJECT_CREDITS = {
     "R21UGT241": 1,
     "R21UCB205": 3,
 
+
     # ---------- Semester 3 ----------
     "R21UCB301": 4,
     "R21UCB302": 3,
@@ -51,79 +56,169 @@ SUBJECT_CREDITS = {
     "R21UCS303": 3,
     "R21UCS305": 3,
     "R21UCS309": 2,
-    "R21UGM331": 0,
+    "R21UGM331": 0
+
 }
 
 
 def get_credit(subject_code):
-    return SUBJECT_CREDITS.get(subject_code, 0)
+
+    return SUBJECT_CREDITS.get(
+        subject_code,
+        0
+    )
 
 
-# ---------------------------------------------------
+
+# =====================================================
 # SGPA Calculation
-# Formula:
-# (Credit × Grade Point) / Earned Credits
-# Earned Credits = Registered Credits - Failed Credits
-# ---------------------------------------------------
+# =====================================================
+
 def calculate_gpa(subjects):
 
     total_credit_points = 0
-    total_registered_credits = 0
+    total_credits = 0
+
     failed_credits = 0
+
 
     for subject in subjects:
 
         credit = subject["credit"]
+
         grade = subject["grade"].upper()
+
         grade_point = subject["grade_point"]
 
-        total_registered_credits += credit
-        total_credit_points += credit * grade_point
 
+
+        # Ignore PASS subject with 0 credit
+        if credit == 0:
+            continue
+
+
+
+        # Arrear subject
         if grade in ["RA", "U"]:
-            failed_credits += credit
+            continue
 
-    earned_credits = total_registered_credits - failed_credits
 
-    if earned_credits == 0:
+
+        total_credit_points += (
+            credit * grade_point
+        )
+
+        total_credits += credit
+
+
+
+    if total_credits == 0:
+
         return 0
 
-    sgpa = total_credit_points / earned_credits
 
-    print("Total Credit Points =", total_credit_points)
-    print("Registered Credits =", total_registered_credits)
-    print("Failed Credits =", failed_credits)
-    print("Earned Credits =", earned_credits)
-    print("SGPA =", sgpa)
 
-    return round(sgpa, 3)
-# ---------------------------------------------------
+    sgpa = (
+        total_credit_points /
+        total_credits
+    )
+
+
+    print(
+        "Total Credit Points =",
+        total_credit_points
+    )
+
+    print(
+        "Earned Credits =",
+        total_credits
+    )
+
+    print(
+        "Failed Credits =",
+        failed_credits
+    )
+
+    print(
+        "SGPA =",
+        sgpa
+    )
+
+
+    return round(
+        sgpa,
+        3
+    )
+
+
+
+# =====================================================
 # CGPA Calculation
-# Average of all Semester SGPAs
-# ---------------------------------------------------
+# =====================================================
+
 def calculate_cgpa(semester_results):
 
     total_credit_points = 0
-    total_earned_credits = 0
+
+    total_credits = 0
+
+
 
     for semester in semester_results:
 
+
         for subject in semester.subjects:
 
+
             grade = subject.grade.upper()
+
             credit = subject.credit
+
             grade_point = subject.grade_point
 
-            total_credit_points += credit * grade_point
 
-            if grade not in ["RA", "U"]:
-                total_earned_credits += credit
 
-    if total_earned_credits == 0:
+            if grade in ["RA", "U"]:
+
+                continue
+
+
+
+            if credit == 0:
+
+                continue
+
+
+
+            total_credit_points += (
+                credit *
+                grade_point
+            )
+
+
+            total_credits += credit
+
+
+
+    if total_credits == 0:
+
         return 0
 
-    cgpa = total_credit_points / total_earned_credits
 
-    print("CGPA =", cgpa)
 
-    return round(cgpa, 3)
+    cgpa = (
+        total_credit_points /
+        total_credits
+    )
+
+
+    print(
+        "CGPA =",
+        cgpa
+    )
+
+
+    return round(
+        cgpa,
+        3
+    )
