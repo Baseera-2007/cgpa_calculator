@@ -43,8 +43,8 @@ SUBJECT_CREDITS = {
     "R21UCB205": 3,
 
     # ---------- Semester 3 ----------
-    "R21UCB301": 3,
-    "R21UCB302": 4,
+    "R21UCB301": 4,
+    "R21UCB302": 3,
     "R21UCB307": 2,
     "R21UCB503": 3,
     "R21UCB862": 2,
@@ -68,7 +68,8 @@ def get_credit(subject_code):
 def calculate_gpa(subjects):
 
     total_credit_points = 0
-    earned_credits = 0
+    total_registered_credits = 0
+    failed_credits = 0
 
     for subject in subjects:
 
@@ -76,39 +77,53 @@ def calculate_gpa(subjects):
         grade = subject["grade"].upper()
         grade_point = subject["grade_point"]
 
-        # Total Credit Points
+        total_registered_credits += credit
         total_credit_points += credit * grade_point
 
-        # Count only passed credits
-        if grade not in ["RA", "U"]:
-            earned_credits += credit
+        if grade in ["RA", "U"]:
+            failed_credits += credit
+
+    earned_credits = total_registered_credits - failed_credits
 
     if earned_credits == 0:
         return 0
-    
-    print("Total Credit Points =", total_credit_points)
-    print("Earned Credits =", earned_credits)
-    print("Raw SGPA =", total_credit_points / earned_credits)
 
     sgpa = total_credit_points / earned_credits
 
+    print("Total Credit Points =", total_credit_points)
+    print("Registered Credits =", total_registered_credits)
+    print("Failed Credits =", failed_credits)
+    print("Earned Credits =", earned_credits)
+    print("SGPA =", sgpa)
+
     return round(sgpa, 3)
-
-
 # ---------------------------------------------------
 # CGPA Calculation
 # Average of all Semester SGPAs
 # ---------------------------------------------------
 def calculate_cgpa(semester_results):
 
-    if not semester_results:
+    total_credit_points = 0
+    total_earned_credits = 0
+
+    for semester in semester_results:
+
+        for subject in semester.subjects:
+
+            grade = subject.grade.upper()
+            credit = subject.credit
+            grade_point = subject.grade_point
+
+            total_credit_points += credit * grade_point
+
+            if grade not in ["RA", "U"]:
+                total_earned_credits += credit
+
+    if total_earned_credits == 0:
         return 0
 
-    total = 0
+    cgpa = total_credit_points / total_earned_credits
 
-    for result in semester_results:
-        total += float(result.sgpa)
-
-    cgpa = total / len(semester_results)
+    print("CGPA =", cgpa)
 
     return round(cgpa, 3)
