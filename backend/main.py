@@ -50,8 +50,53 @@ Base.metadata.create_all(bind=engine)
 app.include_router(report_router)
 
 # ---------------------------------------
-# Signup
+# Request Models
 # ---------------------------------------
+
+from typing import Optional
+
+class SignupRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    role: str
+
+    register_number: Optional[str] = None
+    faculty_id: Optional[str] = None
+
+    department: str
+    batch: str
+    section: str
+    gender: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+# ---------------------------------------
+# Request Model
+# ---------------------------------------
+
+class StudentUpdate(BaseModel):
+    student_name: str
+    department: str
+    batch: str
+    section: str
+    gender: str
+
+class AttendanceCreate(BaseModel):
+    student_id: int
+    attendance_date: date
+    status: str
+    marked_by: str
+
+class AssignedSubjectCreate(BaseModel):
+    batch: str
+    semester: int
+    subject_code: str
+    subject_name: str
 # ---------------------------------------
 # Signup
 # ---------------------------------------
@@ -205,15 +250,6 @@ def login(login: LoginRequest):
     db.close()
 
     return response
-# ---------------------------------------
-# Request Model
-# ---------------------------------------
-class StudentUpdate(BaseModel):
-    student_name: str
-    department: str
-    batch: str
-    section: str
-    gender: str
 
 # ------------------------------------------
 # Upload PDF
@@ -294,6 +330,8 @@ async def upload_pdf(file: UploadFile = File(...)):
                     f"\nChecking Semester {sem_no} for arrears..."
                 )
 
+                print("CURRENT sem_no =", sem_no)
+
                 cleared_subjects = []
 
                 for uploaded in semester_subjects:
@@ -307,11 +345,23 @@ async def upload_pdf(file: UploadFile = File(...)):
 
                     ).first()
 
+                    print("--------------------------------")
+                    print("DB SUBJECT :", db_subject.subject_code if db_subject else "NOT FOUND")
+                    print("UPLOADED   :", uploaded["code"])
+                    print("--------------------------------")
+
                     if not db_subject:
+                        print("NOT FOUND IN DATABASE:", uploaded["code"])
                         continue
 
                     old_grade = db_subject.grade.upper()
                     new_grade = uploaded["grade"].upper()
+
+                    print("===================================")
+                    print("CODE      :", uploaded["code"])
+                    print("OLD GRADE :", old_grade)
+                    print("NEW GRADE :", new_grade)
+                    print("===================================")
 
                     # Arrear Cleared
 
@@ -352,6 +402,8 @@ async def upload_pdf(file: UploadFile = File(...)):
                         })
 
                 db.commit()
+
+                
 
                 # ----------------------------------
                 # Recalculate Entire Semester SGPA
@@ -411,6 +463,18 @@ async def upload_pdf(file: UploadFile = File(...)):
                     
                     for subject in cleared_subjects:
 
+                        print("Saving with cleared_in_semester =", sem_no)
+
+                        # Check whether history already exists
+                        existing_history = db.query(ArrearHistory).filter(
+                            ArrearHistory.student_id == student.id,
+                            ArrearHistory.subject_code == subject["code"]
+                        ).first()
+
+                        if existing_history:
+                            print("History already exists:", subject["code"])
+                            continue
+
                         history = ArrearHistory(
 
                             student_id=student.id,
@@ -434,6 +498,8 @@ async def upload_pdf(file: UploadFile = File(...)):
                             cleared_in_semester=sem_no
 
                         )
+
+                        print("Saving history:", history.subject_code)
 
                         db.add(history)
 
@@ -562,6 +628,41 @@ async def upload_pdf(file: UploadFile = File(...)):
 
         db.close()
 
+#==============================================
+#Arrear popup history
+#==============================================
+@app.get("/student/{student_id}/arrear-history")
+def get_arrear_history(student_id: int):
+
+    db = SessionLocal()
+
+    try:
+
+        history = (
+            db.query(ArrearHistory)
+            .filter(ArrearHistory.student_id == student_id)
+            .order_by(ArrearHistory.id)
+            .all()
+        )
+
+        return [
+            {
+                "id": h.id,
+                "semester": h.semester,
+                "subject_code": h.subject_code,
+                "subject_name": h.subject_name,
+                "old_grade": h.old_grade,
+                "new_grade": h.new_grade,
+                "credit": h.credit,
+                "grade_point": h.grade_point,
+                "arrear_gpa": float(h.arrear_gpa),
+                "cleared_in_semester": h.cleared_in_semester
+            }
+            for h in history
+        ]
+
+    finally:
+        db.close()
         
 # ---------------------------------------
 # Get All Students
