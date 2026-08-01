@@ -11,12 +11,14 @@ from database import SessionLocal, engine, Base
 
 from models import User, Student, SemesterResult, Subject, Attendance, AssignedSubject
 
-from schemas import (
-    AttendanceCreate,
-    SignupRequest,
-    LoginRequest,
-    AssignedSubjectCreate,
-    AssignedSubjectResponse,
+from models import (
+    User,
+    Student,
+    SemesterResult,
+    Subject,
+    Attendance,
+    AssignedSubject,
+    ArrearHistory
 )
 
 
@@ -26,6 +28,7 @@ from cgpa import (
     get_grade_point,
     get_credit,
     calculate_gpa,
+    calculate_arrear_gpa,
     calculate_cgpa
 )
 
@@ -212,18 +215,17 @@ class StudentUpdate(BaseModel):
     section: str
     gender: str
 
-
-
+# ------------------------------------------
+# Upload PDF
+# ------------------------------------------
 @app.post("/upload-pdf")
 async def upload_pdf(file: UploadFile = File(...)):
-
     os.makedirs("uploads", exist_ok=True)
 
     file_path = f"uploads/{file.filename}"
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-
 
     data = parse_pdf(file_path)
 
@@ -233,7 +235,6 @@ async def upload_pdf(file: UploadFile = File(...)):
             detail=data["message"]
         )
 
-
     db = SessionLocal()
 
     try:
@@ -242,16 +243,15 @@ async def upload_pdf(file: UploadFile = File(...)):
             Student.register_number == data["register_number"]
         ).first()
 
-
         if not student:
             raise HTTPException(
                 status_code=404,
                 detail="Student not found"
             )
 
-
-
-        # Add credit and grade point
+        # ----------------------------------
+        # Add Credits & Grade Points
+        # ----------------------------------
 
         for subject in data["subjects"]:
 
@@ -263,87 +263,111 @@ async def upload_pdf(file: UploadFile = File(...)):
                 subject["grade"]
             )
 
-
-
-        # Separate new semester and arrear updates
-
         uploaded_semesters = data["semesters_found"]
-
 
         for sem_no in uploaded_semesters:
 
-
             semester_subjects = [
+
                 s for s in data["subjects"]
+
                 if s["semester"] == sem_no
+
             ]
 
+            semester = db.query(
+                SemesterResult
+            ).filter(
 
-
-            semester = db.query(SemesterResult).filter(
                 SemesterResult.student_id == student.id,
                 SemesterResult.semester == sem_no
+
             ).first()
 
-
-
-            # Semester already exists - only update arrears
+            # ==================================
+            # EXISTING SEMESTER (ARREAR UPLOAD)
+            # ==================================
 
             if semester:
 
+                print(
+                    f"\nChecking Semester {sem_no} for arrears..."
+                )
+
+                cleared_subjects = []
 
                 for uploaded in semester_subjects:
 
+                    db_subject = db.query(
+                        Subject
+                    ).filter(
 
-                    old_subject = db.query(Subject).filter(
                         Subject.semester_result_id == semester.id,
                         Subject.subject_code == uploaded["code"]
+
                     ).first()
 
+                    if not db_subject:
+                        continue
 
+                    old_grade = db_subject.grade.upper()
+                    new_grade = uploaded["grade"].upper()
 
-                    if old_subject:
+                    # Arrear Cleared
 
+                    if old_grade in ["RA", "U"] and new_grade not in ["RA", "U"]:
 
-                        old_grade = old_subject.grade.upper()
-                        new_grade = uploaded["grade"].upper()
+                        print("===================================")
+                        print("UPLOADED SUBJECT:")
+                        print(uploaded)
+                        print("===================================")
 
+                        print(
+                            "ARREAR CLEARED :",
+                            db_subject.subject_code,
+                            old_grade,
+                            "->",
+                            new_grade
+                        )
 
+                        db_subject.grade = new_grade
 
-                        if old_grade in ["RA","U"] and new_grade not in ["RA","U"]:
+                        db_subject.grade_point = uploaded["grade_point"]
 
+                        print(uploaded)
 
-                            print(
-                                "ARREAR CLEARED:",
-                                old_subject.subject_code,
-                                old_grade,
-                                "->",
-                                new_grade
-                            )
+                        cleared_subjects.append({
+                            "semester": uploaded["semester"],
 
+                            "code": db_subject.subject_code,
 
-                            old_subject.grade = new_grade
-                            old_subject.grade_point = uploaded["grade_point"]
+                            "name": db_subject.subject_name,
 
+                            "credit": db_subject.credit,
 
+                            "grade": new_grade,
+
+                            "grade_point": uploaded["grade_point"]
+
+                        })
 
                 db.commit()
 
+                # ----------------------------------
+                # Recalculate Entire Semester SGPA
+                # ----------------------------------
 
-
-                # Recalculate only that semester
-
-                subjects = db.query(Subject).filter(
+                semester_subjects_db = db.query(
+                    Subject
+                ).filter(
                     Subject.semester_result_id == semester.id
                 ).all()
 
+                recalculate_subjects = []
 
+                for sub in semester_subjects_db:
 
-                calc = []
-
-                for sub in subjects:
-
-                    calc.append({
+                    recalculate_subjects.append({
 
                         "code": sub.subject_code,
                         "grade": sub.grade,
@@ -352,57 +376,123 @@ async def upload_pdf(file: UploadFile = File(...)):
 
                     })
 
+                # Update Semester SGPA
+                semester.sgpa = calculate_gpa(
+                    recalculate_subjects
+                )
 
-                semester.sgpa = calculate_gpa(calc)
+                print(
+                    f"UPDATED SEM {sem_no} SGPA =",
+                    semester.sgpa
+                )
 
-                db.commit()
+                # ----------------------------------
+                # Calculate Arrear GPA
+                # ----------------------------------
+
+                arrear_gpa = 0
+
+                if len(cleared_subjects) > 0:
+
+                    arrear_gpa = calculate_arrear_gpa(
+                        cleared_subjects
+                    )
+
+                    print(
+                        "ARREAR GPA =",
+                        arrear_gpa
+                    )
+
+                    # ----------------------------------
+                    # TODO:
+                    # Save arrear history here
+                    # (We'll connect this to the popup UI later.)
+                    # ----------------------------------
+                    
+                    for subject in cleared_subjects:
+
+                        history = ArrearHistory(
+
+                            student_id=student.id,
+
+                            semester = subject["semester"],
+
+                            subject_code=subject["code"],
+
+                            subject_name=subject["name"],
+
+                            old_grade="RA",
+
+                            new_grade=subject["grade"],
+
+                            credit=subject["credit"],
+
+                            grade_point=subject["grade_point"],
+
+                            arrear_gpa=arrear_gpa,
+
+                            cleared_in_semester=sem_no
+
+                        )
+
+                        db.add(history)
+
+                    db.commit()
 
 
-
-            # New semester upload
+            # ==================================
+            # NEW SEMESTER
+            # ==================================
 
             else:
 
-
                 semester = SemesterResult(
+
                     student_id=student.id,
+
                     semester=sem_no,
+
                     result_pdf=file.filename
+
                 )
 
-
                 db.add(semester)
+
                 db.commit()
+
                 db.refresh(semester)
-
-
 
                 for subject in semester_subjects:
 
-
                     db.add(
-                        Subject(
-                            semester_result_id=semester.id,
-                            subject_code=subject["code"],
-                            subject_name=subject["name"],
-                            grade=subject["grade"],
-                            credit=subject["credit"],
-                            grade_point=subject["grade_point"]
-                        )
-                    )
 
+                        Subject(
+
+                            semester_result_id=semester.id,
+
+                            subject_code=subject["code"],
+
+                            subject_name=subject["name"],
+
+                            grade=subject["grade"],
+
+                            credit=subject["credit"],
+
+                            grade_point=subject["grade_point"]
+
+                        )
+
+                    )
 
                 db.commit()
 
-
-
-                subjects = db.query(Subject).filter(
+                subjects = db.query(
+                    Subject
+                ).filter(
                     Subject.semester_result_id == semester.id
                 ).all()
 
-
                 calc = []
-
 
                 for sub in subjects:
 
@@ -415,55 +505,58 @@ async def upload_pdf(file: UploadFile = File(...)):
 
                     })
 
-
-                semester.sgpa = calculate_gpa(calc)
+                semester.sgpa = calculate_gpa(
+                    calc
+                )
 
                 db.commit()
 
+        # ==================================
+        # UPDATE STUDENT CGPA
+        # ==================================
 
-
-        # Update CGPA
-
-        all_semesters = db.query(SemesterResult).filter(
+        all_semesters = db.query(
+            SemesterResult
+        ).filter(
             SemesterResult.student_id == student.id
         ).all()
-
-
 
         student.current_semester = max(
             s.semester for s in all_semesters
         )
 
-
         student.current_cgpa = calculate_cgpa(
             all_semesters
         )
 
-
         db.commit()
-
-
 
         return {
 
             "message": "Result processed successfully",
-            "current_cgpa": float(student.current_cgpa)
+
+            "current_cgpa": float(
+                student.current_cgpa
+            )
 
         }
-
-
 
     except Exception as e:
 
         db.rollback()
 
-        print("UPLOAD ERROR:", e)
-
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
+        print(
+            "UPLOAD ERROR:",
+            e
         )
 
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=str(e)
+
+        )
 
     finally:
 

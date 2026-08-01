@@ -152,3 +152,34 @@ class AssignedSubject(Base):
     subject_code = Column(String(20), nullable=False)
 
     subject_name = Column(String(200), nullable=False)
+
+class ArrearHistory(Base):
+    __tablename__ = "arrear_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    student_id = Column(
+        Integer,
+        ForeignKey("students.id")
+    )
+
+    semester = Column(Integer)
+
+    subject_code = Column(String)
+
+    subject_name = Column(String)
+
+    old_grade = Column(String)
+
+    new_grade = Column(String)
+
+    credit = Column(Integer)
+
+    grade_point = Column(Integer)
+
+    arrear_gpa = Column(DECIMAL(6,3))
+
+    # NEW
+    cleared_in_semester = Column(Integer)
+
+    student = relationship("Student")

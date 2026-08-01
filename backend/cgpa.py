@@ -38,7 +38,7 @@ SUBJECT_CREDITS = {
     "R21UAC231": 0,
     "R21UMA208": 4,
     "R21UMA209": 4,
-    "R21UCB206": 3,
+    "R21UCB206": 2,
     "R21UEC225": 3,
     "R21UEN202": 2,
     "R21UCB211": 1,
@@ -50,12 +50,12 @@ SUBJECT_CREDITS = {
     # ---------- Semester 3 ----------
     "R21UCB301": 4,
     "R21UCB302": 3,
-    "R21UCB307": 2,
-    "R21UCB503": 3,
-    "R21UCB862": 2,
+    "R21UCB307": 1,
+    "R21UCB503": 2,
+    "R21UCB862": 1,
     "R21UCS303": 3,
     "R21UCS305": 3,
-    "R21UCS309": 2,
+    "R21UCS309": 1,
     "R21UGM331": 0
 
 }
@@ -150,6 +150,22 @@ def calculate_gpa(subjects):
         3
     )
 
+#====================================================
+# Arrear sgpa calculation
+#=======================================================
+def calculate_arrear_gpa(cleared_subjects):
+    total_credit_points = 0
+    total_credits = 0
+
+    for subject in cleared_subjects:
+        total_credit_points += subject["credit"] * subject["grade_point"]
+        total_credits += subject["credit"]
+
+    if total_credits == 0:
+        return 0
+
+    return round(total_credit_points / total_credits, 3)
+
 
 
 # =====================================================
@@ -159,66 +175,34 @@ def calculate_gpa(subjects):
 def calculate_cgpa(semester_results):
 
     total_credit_points = 0
-
     total_credits = 0
-
-
 
     for semester in semester_results:
 
-
         for subject in semester.subjects:
-
-
-            grade = subject.grade.upper()
 
             credit = subject.credit
 
-            grade_point = subject.grade_point
+            if credit == 0:
+                continue
 
-
+            grade = subject.grade.upper()
 
             if grade in ["RA", "U"]:
-
                 continue
 
+            grade_point = subject.grade_point
 
-
-            if credit == 0:
-
-                continue
-
-
-
-            total_credit_points += (
-                credit *
-                grade_point
-            )
-
-
+            total_credit_points += credit * grade_point
             total_credits += credit
 
-
-
     if total_credits == 0:
-
         return 0
 
+    cgpa = total_credit_points / total_credits
 
+    print("TOTAL CREDIT POINTS =", total_credit_points)
+    print("TOTAL CREDITS =", total_credits)
+    print("CGPA =", cgpa)
 
-    cgpa = (
-        total_credit_points /
-        total_credits
-    )
-
-
-    print(
-        "CGPA =",
-        cgpa
-    )
-
-
-    return round(
-        cgpa,
-        3
-    )
+    return round(cgpa, 3)
