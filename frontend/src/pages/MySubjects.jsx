@@ -116,16 +116,26 @@ function MySubjects() {
   // ----------------------------
 
   const handleDelete = async (id) => {
-    await fetch(`http://127.0.0.1:8000/assigned-subjects/${id}`, {
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this subject?"
+  );
+
+  if (!confirmDelete) return;
+
+  await fetch(
+    `http://127.0.0.1:8000/assigned-subjects/${id}`,
+    {
       method: "DELETE",
-    });
+    }
+  );
 
-    const updated = await fetch(
-      `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
-    );
+  const updated = await fetch(
+    `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+  );
 
-    setMySubjects(await updated.json());
-  };
+  setMySubjects(await updated.json());
+};
 
   return (
     <Box sx={{ p: 4 }}>
@@ -243,32 +253,18 @@ function MySubjects() {
           overflow: "hidden",
         }}
       >
-        <Box
-          sx={{
-            background: "#1e3a8a",
-            color: "white",
-            px: 3,
-            py: 2,
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-          >
-            My Subjects
-          </Typography>
-        </Box>
+        
 
         <TableContainer>
           <Table>
 
             <TableHead>
 
-              <TableRow
-                sx={{
-                  background: "#f4f6fb",
-                }}
-              >
+  <TableRow
+    sx={{
+      background: "#f4f6fb",
+    }}
+  >
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Subject Code
                 </TableCell>
