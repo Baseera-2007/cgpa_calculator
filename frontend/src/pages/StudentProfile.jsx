@@ -770,7 +770,9 @@ const handleDeleteSemester = async(id)=>{
 
 
 
-      {/* BACKLOG DETAILS DIALOG */}
+    { /* BACKLOG DETAILS DIALOG */}
+
+{/* BACKLOG DETAILS DIALOG */}
 
 <Dialog
   open={openBacklogs}
@@ -778,13 +780,7 @@ const handleDeleteSemester = async(id)=>{
   fullWidth
   maxWidth="md"
 >
-  <DialogTitle
-    sx={{
-      bgcolor: "#d32f2f",
-      color: "#fff",
-      fontWeight: "bold",
-    }}
-  >
+  <DialogTitle>
     Backlog Details - Semester {selectedSemester?.semester}
   </DialogTitle>
 
@@ -807,6 +803,9 @@ const handleDeleteSemester = async(id)=>{
       </TableHead>
 
       <TableBody>
+
+        {/* Current Backlogs */}
+
         {selectedSemester?.subjects.filter((sub) => {
           const grade = sub.grade?.trim().toUpperCase();
 
@@ -816,22 +815,8 @@ const handleDeleteSemester = async(id)=>{
             grade === "F" ||
             grade === "FAIL"
           );
-        }).length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={3}
-              align="center"
-              sx={{
-                color: "green",
-                fontWeight: "bold",
-                fontSize: "18px",
-                py: 4,
-              }}
-            >
-              🎉 No Backlogs Found 🎉
-            </TableCell>
-          </TableRow>
-        ) : (
+        }).length > 0 ? (
+
           selectedSemester?.subjects
             .filter((sub) => {
               const grade = sub.grade?.trim().toUpperCase();
@@ -863,7 +848,112 @@ const handleDeleteSemester = async(id)=>{
                 </TableCell>
               </TableRow>
             ))
+
+        ) : (
+
+          <TableRow>
+            <TableCell
+              colSpan={3}
+              align="center"
+              sx={{
+                color: "green",
+                fontWeight: "bold",
+                fontSize: "18px",
+                py: 3,
+              }}
+            >
+              🎉 No Current Backlogs
+            </TableCell>
+          </TableRow>
+
         )}
+
+        {/* Cleared Arrear History */}
+
+        {arrearHistory
+          ?.filter(
+            (item) =>
+              Number(item.semester) ===
+              Number(selectedSemester?.semester)
+          )
+          .length > 0 && (
+            <>
+
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  sx={{
+                    bgcolor: "#E8F5E9",
+                    color: "#2E7D32",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    fontSize: "16px",
+                  }}
+                >
+                  Previously Cleared Arrears
+                </TableCell>
+              </TableRow>
+
+              {arrearHistory
+                .filter(
+                  (item) =>
+                    Number(item.semester) ===
+                    Number(selectedSemester?.semester)
+                )
+                .map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {item.subject_code}
+                    </TableCell>
+
+                    <TableCell>
+                      {item.subject_name}
+                    </TableCell>
+
+                    <TableCell
+                      sx={{
+                        color: "green",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {item.old_grade} → {item.new_grade}
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+              <TableRow>
+                <TableCell
+                  colSpan={2}
+                  align="right"
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#1565C0",
+                    fontSize: "16px",
+                  }}
+                >
+                  Arrear GPA
+                </TableCell>
+
+                <TableCell
+                  sx={{
+                    color: "#1565C0",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                >
+                  {Number(
+                    arrearHistory.find(
+                      (item) =>
+                        Number(item.semester) ===
+                        Number(selectedSemester?.semester)
+                    )?.arrear_gpa || 0
+                  ).toFixed(3)}
+                </TableCell>
+              </TableRow>
+
+            </>
+          )}
+
       </TableBody>
     </Table>
   </DialogContent>
@@ -878,7 +968,6 @@ const handleDeleteSemester = async(id)=>{
     </Button>
   </DialogActions>
 </Dialog>
-
 
 
 

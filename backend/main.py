@@ -629,11 +629,10 @@ async def upload_pdf(file: UploadFile = File(...)):
         db.close()
 
 #==============================================
-#Arrear popup history
+# Arrear popup history
 #==============================================
 @app.get("/student/{student_id}/arrear-history")
 def get_arrear_history(student_id: int):
-
     db = SessionLocal()
 
     try:
@@ -644,6 +643,27 @@ def get_arrear_history(student_id: int):
             .order_by(ArrearHistory.id)
             .all()
         )
+
+        history = [
+            h for h in history
+            if h.old_grade != h.new_grade
+        ]
+
+        # Current backlog subjects
+        current_backlogs = (
+            db.query(Subject)
+            .join(SemesterResult)
+            .filter(
+                SemesterResult.student_id == student_id,
+                Subject.grade.in_(["RA", "U", "F", "FAIL"])
+            )
+            .all()
+        )
+
+        current_codes = {
+            sub.subject_code
+            for sub in current_backlogs
+        }
 
         return [
             {
@@ -656,7 +676,8 @@ def get_arrear_history(student_id: int):
                 "credit": h.credit,
                 "grade_point": h.grade_point,
                 "arrear_gpa": float(h.arrear_gpa),
-                "cleared_in_semester": h.cleared_in_semester
+                "cleared_in_semester": h.cleared_in_semester,
+                "is_current_backlog": h.subject_code in current_codes
             }
             for h in history
         ]
