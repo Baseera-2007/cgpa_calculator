@@ -1032,7 +1032,27 @@ def delete_subject(subject_id: int):
     return {
         "message": "Subject deleted successfully."
     }
-    
+
+# ==========================================
+# GET ALL ASSIGNED SUBJECTS
+# ==========================================
+@app.get("/assigned-subjects/all")
+def get_all_assigned_subjects():
+    db = SessionLocal()
+
+    try:
+        subjects = (
+            db.query(AssignedSubject)
+            .order_by(AssignedSubject.subject_code)
+            .all()
+        )
+
+        return subjects
+
+    finally:
+        db.close()
+        
+            
 @app.get("/subjects/{semester}")
 def get_subjects(semester: int):
 

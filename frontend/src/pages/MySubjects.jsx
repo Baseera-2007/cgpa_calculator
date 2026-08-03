@@ -28,6 +28,7 @@ function MySubjects() {
   const [subject, setSubject] = useState(null);
 
   const [mySubjects, setMySubjects] = useState([]);
+  const [allSubjects, setAllSubjects] = useState([]);
 
   // ----------------------------
   // Load Subject Master
@@ -67,6 +68,14 @@ function MySubjects() {
       .then((data) => setMySubjects(data));
   }, [batch, semester]);
 
+
+useEffect(() => {
+  fetch("http://127.0.0.1:8000/assigned-subjects/all")
+    .then((res) => res.json())
+    .then((data) => setAllSubjects(data));
+}, []);
+
+
   // ----------------------------
   // Add Subject
   // ----------------------------
@@ -103,12 +112,18 @@ function MySubjects() {
     alert("Subject Added Successfully");
 
     const updated = await fetch(
-      `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
-    );
+  `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+);
 
-    setMySubjects(await updated.json());
+setMySubjects(await updated.json());
 
-    setSubject(null);
+const allUpdated = await fetch(
+  "http://127.0.0.1:8000/assigned-subjects/all"
+);
+
+setAllSubjects(await allUpdated.json());
+
+setSubject(null);
   };
 
   // ----------------------------
@@ -131,10 +146,16 @@ function MySubjects() {
   );
 
   const updated = await fetch(
-    `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
-  );
+  `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+);
 
-  setMySubjects(await updated.json());
+setMySubjects(await updated.json());
+
+const allUpdated = await fetch(
+  `http://127.0.0.1:8000/assigned-subjects/all`
+);
+
+setAllSubjects(await allUpdated.json());
 };
 
   return (
@@ -259,10 +280,13 @@ function MySubjects() {
           <Table>
 
             <TableHead>
-
   <TableRow
     sx={{
-      background: "#f4f6fb",
+      background: "#1e3a8a",
+      "& th": {
+        color: "#fff",
+        fontWeight: "bold",
+      },
     }}
   >
                 <TableCell sx={{ fontWeight: "bold" }}>
@@ -285,7 +309,7 @@ function MySubjects() {
 
             <TableBody>
 
-              {mySubjects.length === 0 ? (
+              {allSubjects.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={3}
@@ -298,7 +322,7 @@ function MySubjects() {
                   </TableCell>
                 </TableRow>
               ) : (
-                mySubjects.map((sub) => (
+                allSubjects.map((sub) => (
                   <TableRow
                     key={sub.id}
                     hover
