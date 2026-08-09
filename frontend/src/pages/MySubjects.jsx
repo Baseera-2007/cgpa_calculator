@@ -30,10 +30,9 @@ function MySubjects() {
   const [mySubjects, setMySubjects] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
 
-  // ----------------------------
+  // ----------------------------------
   // Load Subject Master
-  // ----------------------------
-
+  // ----------------------------------
   useEffect(() => {
     if (!semester) return;
 
@@ -51,116 +50,156 @@ function MySubjects() {
 
         setSubjects(formatted);
         setSubject(null);
+      })
+      .catch((error) => {
+        console.error("Error loading subjects:", error);
+        setSubjects([]);
       });
   }, [semester]);
 
-  // ----------------------------
+  // ----------------------------------
   // Load Assigned Subjects
-  // ----------------------------
-
+  // ----------------------------------
   useEffect(() => {
-    if (!batch || !semester) return;
+    if (!batch || !semester) {
+      setMySubjects([]);
+      return;
+    }
 
     fetch(
       `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
     )
       .then((res) => res.json())
-      .then((data) => setMySubjects(data));
+      .then((data) => {
+        setMySubjects(data);
+      })
+      .catch((error) => {
+        console.error("Error loading assigned subjects:", error);
+        setMySubjects([]);
+      });
   }, [batch, semester]);
 
+  // ----------------------------------
+  // Load All Assigned Subjects
+  // ----------------------------------
+  const loadAllSubjects = async () => {
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/assigned-subjects/all"
+      );
 
-useEffect(() => {
-  fetch("http://127.0.0.1:8000/assigned-subjects/all")
-    .then((res) => res.json())
-    .then((data) => setAllSubjects(data));
-}, []);
+      const data = await response.json();
 
+      setAllSubjects(data);
+    } catch (error) {
+      console.error("Error loading all subjects:", error);
+      setAllSubjects([]);
+    }
+  };
 
-  // ----------------------------
+  useEffect(() => {
+    loadAllSubjects();
+  }, []);
+
+  // ----------------------------------
   // Add Subject
-  // ----------------------------
-
+  // ----------------------------------
   const handleAdd = async () => {
     if (!batch || !semester || !subject) {
       alert("Please fill all fields.");
       return;
     }
 
-    const response = await fetch(
-      "http://127.0.0.1:8000/assigned-subjects",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          batch,
-          semester,
-          subject_code: subject.code,
-          subject_name: subject.name,
-        }),
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/assigned-subjects",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            batch,
+            semester,
+            subject_code: subject.code,
+            subject_name: subject.name,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.detail || "Unable to add subject.");
+        return;
       }
-    );
 
-    const data = await response.json();
+      alert("Subject Added Successfully");
 
-    if (!response.ok) {
-      alert(data.detail);
-      return;
+      const updated = await fetch(
+        `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+      );
+
+      const updatedData = await updated.json();
+
+      setMySubjects(updatedData);
+
+      await loadAllSubjects();
+
+      setSubject(null);
+    } catch (error) {
+      console.error("Error adding subject:", error);
+      alert("Something went wrong while adding the subject.");
     }
-
-    alert("Subject Added Successfully");
-
-    const updated = await fetch(
-  `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
-);
-
-setMySubjects(await updated.json());
-
-const allUpdated = await fetch(
-  "http://127.0.0.1:8000/assigned-subjects/all"
-);
-
-setAllSubjects(await allUpdated.json());
-
-setSubject(null);
   };
 
-  // ----------------------------
+  // ----------------------------------
   // Delete Subject
-  // ----------------------------
-
+  // ----------------------------------
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this subject?"
+    );
 
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this subject?"
-  );
+    if (!confirmDelete) return;
 
-  if (!confirmDelete) return;
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/assigned-subjects/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-  await fetch(
-    `http://127.0.0.1:8000/assigned-subjects/${id}`,
-    {
-      method: "DELETE",
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.detail || "Unable to delete subject.");
+        return;
+      }
+
+      const updated = await fetch(
+        `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+      );
+
+      const updatedData = await updated.json();
+
+      setMySubjects(updatedData);
+
+      await loadAllSubjects();
+
+      alert("Subject deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting subject:", error);
+      alert("Something went wrong while deleting the subject.");
     }
-  );
-
-  const updated = await fetch(
-  `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
-);
-
-setMySubjects(await updated.json());
-
-const allUpdated = await fetch(
-  `http://127.0.0.1:8000/assigned-subjects/all`
-);
-
-setAllSubjects(await allUpdated.json());
-};
+  };
 
   return (
     <Box sx={{ p: 4 }}>
-
+      {/* ----------------------------------
+          Page Header
+      ---------------------------------- */}
       <Box
         sx={{
           display: "flex",
@@ -187,6 +226,9 @@ setAllSubjects(await allUpdated.json());
         </Typography>
       </Box>
 
+      {/* ----------------------------------
+          Add Subject Section
+      ---------------------------------- */}
       <Paper
         elevation={4}
         sx={{
@@ -203,6 +245,7 @@ setAllSubjects(await allUpdated.json());
             alignItems: "center",
           }}
         >
+          {/* Batch */}
           <TextField
             select
             label="Batch"
@@ -215,6 +258,7 @@ setAllSubjects(await allUpdated.json());
             <MenuItem value="2025-2029">2025-2029</MenuItem>
           </TextField>
 
+          {/* Semester */}
           <TextField
             select
             label="Semester"
@@ -222,33 +266,35 @@ setAllSubjects(await allUpdated.json());
             onChange={(e) => setSemester(e.target.value)}
             sx={{ width: 180 }}
           >
-            {[1,2,3,4,5,6,7,8].map((sem)=>(
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
               <MenuItem key={sem} value={sem}>
                 Semester {sem}
               </MenuItem>
             ))}
           </TextField>
 
+          {/* Subject */}
           <Autocomplete
             sx={{ width: 430 }}
             options={subjects}
             value={subject}
-            onChange={(e, newValue) => setSubject(newValue)}
+            onChange={(event, newValue) => setSubject(newValue)}
             getOptionLabel={(option) =>
               `${option.code} - ${option.name}`
             }
             isOptionEqualToValue={(option, value) =>
-               option.code === value?.code
+              option.code === value?.code
             }
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Search Subject"
                 placeholder="Type subject code or name..."
-               />
+              />
             )}
           />
 
+          {/* Add Button */}
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -260,6 +306,9 @@ setAllSubjects(await allUpdated.json());
               background: "#1e3a8a",
               textTransform: "none",
               fontWeight: 600,
+              "&:hover": {
+                background: "#172d6b",
+              },
             }}
           >
             Add Subject
@@ -267,6 +316,9 @@ setAllSubjects(await allUpdated.json());
         </Box>
       </Paper>
 
+      {/* ----------------------------------
+          Assigned Subjects Table
+      ---------------------------------- */}
       <Paper
         elevation={4}
         sx={{
@@ -274,41 +326,29 @@ setAllSubjects(await allUpdated.json());
           overflow: "hidden",
         }}
       >
-        
-
         <TableContainer>
           <Table>
-
             <TableHead>
-  <TableRow
-    sx={{
-      background: "#1e3a8a",
-      "& th": {
-        color: "#fff",
-        fontWeight: "bold",
-      },
-    }}
-  >
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Subject Code
-                </TableCell>
+              <TableRow
+                sx={{
+                  background: "#1e3a8a",
+                  "& th": {
+                    color: "#fff",
+                    fontWeight: "bold",
+                  },
+                }}
+              >
+                <TableCell>Subject Code</TableCell>
 
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Subject Name
-                </TableCell>
+                <TableCell>Subject Name</TableCell>
 
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold" }}
-                >
+                <TableCell align="center">
                   Action
                 </TableCell>
               </TableRow>
-
             </TableHead>
 
             <TableBody>
-
               {allSubjects.length === 0 ? (
                 <TableRow>
                   <TableCell
@@ -342,8 +382,12 @@ setAllSubjects(await allUpdated.json());
                     <TableCell align="center">
                       <Button
                         color="error"
-                        startIcon={<DeleteOutlineRoundedIcon />}
-                        onClick={() => handleDelete(sub.id)}
+                        startIcon={
+                          <DeleteOutlineRoundedIcon />
+                        }
+                        onClick={() =>
+                          handleDelete(sub.id)
+                        }
                         sx={{
                           textTransform: "none",
                           borderRadius: 2,
@@ -355,13 +399,10 @@ setAllSubjects(await allUpdated.json());
                   </TableRow>
                 ))
               )}
-
             </TableBody>
-
           </Table>
         </TableContainer>
       </Paper>
-
     </Box>
   );
 }

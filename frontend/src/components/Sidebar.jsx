@@ -24,16 +24,22 @@ function Sidebar() {
             </li>
 
             <li>
-              <NavLink to="/staff/my-subjects">
-                📘 My Subjects
-              </NavLink>
-            </li>
+  <NavLink to="/staff/my-subjects">
+    📘 My Subjects
+  </NavLink>
+</li>
 
-            <li>
-              <NavLink to="/staff/attendance">
-                📝 Attendance
-              </NavLink>
-            </li>
+<li>
+  <NavLink to="/staff/subject-attendance">
+    📚 Subject Attendance
+  </NavLink>
+</li>
+
+<li>
+  <NavLink to="/staff/attendance">
+    📝 Attendance
+  </NavLink>
+</li>
 
             <li>
               <NavLink to="/staff/reports">

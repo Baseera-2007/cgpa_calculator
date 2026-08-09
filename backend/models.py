@@ -183,3 +183,34 @@ class ArrearHistory(Base):
     cleared_in_semester = Column(Integer)
 
     student = relationship("Student")
+
+# ==========================================
+# Subject Attendance Table
+# ==========================================
+
+class SubjectAttendance(Base):
+    __tablename__ = "subject_attendance"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    student_id = Column(
+        Integer,
+        ForeignKey("students.id"),
+        nullable=False
+    )
+
+    assigned_subject_id = Column(
+        Integer,
+        ForeignKey("assigned_subjects.id"),
+        nullable=False
+    )
+
+    attendance_date = Column(Date, nullable=False)
+
+    status = Column(String, nullable=False)
+
+    marked_by = Column(String, nullable=False)
+
+    student = relationship("Student")
+
+    assigned_subject = relationship("AssignedSubject")

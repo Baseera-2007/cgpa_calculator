@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Attendance from "./pages/Attendance";
+import SubjectAttendance from "./pages/SubjectAttendance";
 
 import MainLayout from "./layouts/MainLayout";
 
@@ -30,17 +31,49 @@ function App() {
       {/* Staff Portal */}
       <Route path="/staff" element={<MainLayout />}>
         <Route index element={<Home />} />
-        <Route path="students" element={<Students />} />
-        <Route path="my-subjects" element={<MySubjects />} />
-        <Route path="attendance" element={<Attendance />} />
-        <Route path="reports" element={<Reports />} />
-        <Route path="settings" element={<Settings />} />
+
+        <Route
+          path="students"
+          element={<Students />}
+        />
+
+        <Route
+          path="my-subjects"
+          element={<MySubjects />}
+        />
+
+        <Route
+          path="subject-attendance"
+          element={<SubjectAttendance />}
+        />
+
+        <Route
+          path="attendance"
+          element={<Attendance />}
+        />
+
+        <Route
+          path="reports"
+          element={<Reports />}
+        />
+
+        <Route
+          path="settings"
+          element={<Settings />}
+        />
       </Route>
 
       {/* Student Portal */}
       <Route path="/student" element={<MainLayout />}>
-        <Route index element={<UploadResult />} />
-        <Route path="profile" element={<StudentProfile />} />
+        <Route
+          index
+          element={<UploadResult />}
+        />
+
+        <Route
+          path="profile"
+          element={<StudentProfile />}
+        />
       </Route>
 
     </Routes>
