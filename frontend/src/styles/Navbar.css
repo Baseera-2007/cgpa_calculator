@@ -1,6 +1,6 @@
 .navbar {
   height: 70px;
-  background-color: #1e3a8a;
+  background: #1e3a8a;
   color: white;
 
   display: flex;
@@ -8,27 +8,202 @@
   align-items: center;
 
   padding: 0 30px;
+
+  box-sizing: border-box;
+
+  position: relative;
+  z-index: 1000;
 }
 
-.navbar h2 {
-  margin: 0;
+
+/* LEFT SIDE */
+
+.navbar-left {
+  display: flex;
+  align-items: center;
 }
+
+.navbar-left h2 {
+  margin: 0;
+
+  font-size: 21px;
+  font-weight: 600;
+
+  letter-spacing: 0.2px;
+}
+
+
+/* RIGHT SIDE */
 
 .navbar-right {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+
+  font-size: 15px;
   font-weight: 500;
-}
-.logout-btn {
-  background: #dc2626;
-  color: white;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
+
+  position: relative;
 }
 
-.logout-btn:hover {
-  background: #b91c1c;
+
+/* WELCOME TEXT */
+
+.welcome-text {
+  color: #dbeafe;
+  margin-right: 4px;
+}
+
+
+/* PROFILE AREA */
+
+.profile-wrapper {
+  position: relative;
+}
+
+
+/* NAME BUTTON */
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  background: transparent;
+  border: none;
+
+  color: white;
+
+  padding: 8px 6px;
+
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  border-radius: 7px;
+
+  transition: background 0.2s ease;
+}
+
+.profile-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* USERNAME */
+
+.username {
+  color: #ffffff;
+}
+
+
+/* DROPDOWN ARROW */
+
+.dropdown-arrow {
+  font-size: 9px;
+
+  color: #dbeafe;
+
+  transition: transform 0.2s ease;
+}
+
+.arrow-up {
+  transform: rotate(180deg);
+}
+
+
+/* WAVE */
+
+.wave {
+  margin-left: 5px;
+  font-size: 17px;
+}
+
+
+/* DROPDOWN MENU */
+
+.profile-dropdown {
+  position: absolute;
+
+  top: calc(100% + 8px);
+  right: 0;
+
+  width: 150px;
+
+  background: #ffffff;
+
+  border-radius: 9px;
+
+  padding: 6px;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.15);
+
+  border: 1px solid #e5e7eb;
+
+  animation: dropdownOpen 0.15s ease;
+
+  z-index: 2000;
+}
+
+
+/* SMALL DROPDOWN ANIMATION */
+
+@keyframes dropdownOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* LOGOUT */
+
+.logout-dropdown-btn {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  background: transparent;
+
+  border: none;
+
+  color: #374151;
+
+  padding: 10px 12px;
+
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-family: inherit;
+
+  text-align: left;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.logout-dropdown-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+/* LOGOUT ICON */
+
+.logout-dropdown-btn span {
+  font-size: 16px;
 }

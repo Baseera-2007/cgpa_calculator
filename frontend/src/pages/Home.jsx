@@ -6,80 +6,55 @@ import Dashboard from "../components/Dashboard";
 import {
   Typography,
   Box,
-  Paper,
 } from "@mui/material";
 
-import SchoolIcon from "@mui/icons-material/School";
-
 function Home() {
-
   const [batch, setBatch] = useState("2023-2027");
 
   return (
-    <Box sx={{ p: 4 }}>
-
-      {/* Header */}
-      <Paper
-        elevation={3}
+    <Box
+      sx={{
+        p: { xs: 2, md: 3 },
+        backgroundColor: "#f8fafc",
+        minHeight: "100vh",
+      }}
+    >
+      {/* Page Header */}
+      <Box
         sx={{
-          p: 4,
-          borderRadius: 4,
-          mb: 4,
-          background:
-            "linear-gradient(135deg,#1e3a8a,#2563eb)",
-          color: "white",
+          mb: 3,
         }}
       >
-        <Box
+        <Typography
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
+            fontSize: { xs: "24px", md: "28px" },
+            fontWeight: 600,
+            color: "#1f2937",
+            letterSpacing: "-0.3px",
           }}
         >
-          <SchoolIcon
-            sx={{
-              fontSize: 55,
-            }}
-          />
+          Dashboard
+        </Typography>
 
-          <Box>
-            <Typography
-              sx={{
-                fontSize: "34px",
-                fontWeight: "bold",
-                letterSpacing: 1,
-              }}
-            >
-              Academic Dashboard
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 1,
-                opacity: 0.9,
-                fontSize: "17px",
-              }}
-            >
-              Manage student records, upload semester results,
-              calculate SGPA & CGPA and monitor academic
-              performance batch-wise.
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
+        <Typography
+          sx={{
+            mt: 0.5,
+            fontSize: "14px",
+            color: "#6b7280",
+          }}
+        >
+          Academic performance overview
+        </Typography>
+      </Box>
 
       {/* Batch Filter */}
-      <Box sx={{ mb: 4 }}>
-        <FilterBar
-          batch={batch}
-          setBatch={setBatch}
-        />
-      </Box>
+      <FilterBar
+        batch={batch}
+        setBatch={setBatch}
+      />
 
       {/* Dashboard */}
       <Dashboard batch={batch} />
-
     </Box>
   );
 }

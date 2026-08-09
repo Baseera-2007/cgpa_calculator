@@ -1,60 +1,116 @@
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
 
 function Navbar() {
-
   const navigate = useNavigate();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const username = localStorage.getItem("username");
   const role = localStorage.getItem("role");
 
+  const displayName = username || "User";
+
   const handleLogout = () => {
-
     localStorage.clear();
-
     navigate("/");
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
+  }, []);
 
   return (
     <nav className="navbar">
 
+      {/* LEFT SIDE */}
       <div className="navbar-left">
 
         <h2>
-          🎓 {role === "staff"
+          🎓{" "}
+          {role === "staff"
             ? "Staff Portal"
             : "Student Portal"}
         </h2>
 
       </div>
 
-      <div
-        className="navbar-right"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "20px",
-        }}
-      >
 
-        <span>
-          Welcome, {username} 👋
+      {/* RIGHT SIDE */}
+      <div className="navbar-right">
+
+        <span className="welcome-text">
+          Welcome,{" "}
         </span>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            background: "#ef4444",
-            color: "white",
-            border: "none",
-            padding: "10px 18px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+
+        {/* PROFILE / NAME DROPDOWN */}
+        <div
+          className="profile-wrapper"
+          ref={menuRef}
         >
-          Logout
-        </button>
+
+          <button
+            className="profile-button"
+            onClick={() =>
+              setMenuOpen((previous) => !previous)
+            }
+          >
+
+            <span className="username">
+              {displayName}
+            </span>
+
+            <span
+              className={`dropdown-arrow ${
+                menuOpen ? "arrow-up" : ""
+              }`}
+            >
+              ▼
+            </span>
+
+          </button>
+
+
+          {/* DROPDOWN */}
+          {menuOpen && (
+            <div className="profile-dropdown">
+
+              <button
+                className="logout-dropdown-btn"
+                onClick={handleLogout}
+              >
+                <span>↪</span>
+                Logout
+              </button>
+
+            </div>
+          )}
+
+        </div>
+
+        <span className="wave">
+          👋
+        </span>
 
       </div>
 

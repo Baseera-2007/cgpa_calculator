@@ -15,8 +15,6 @@ function SubjectAttendance() {
     new Date().toISOString().split("T")[0]
   );
 
-  const [section, setSection] = useState("");
-
   const [attendance, setAttendance] = useState({});
 
   const [loadingSubjects, setLoadingSubjects] = useState(false);
@@ -104,13 +102,13 @@ function SubjectAttendance() {
       // ------------------------------------------------------
 
       const studentsResponse = await fetch(
-        `${API_BASE_URL}/subject-attendance/students?assigned_subject_id=${selectedSubject}${
-          section ? `&section=${encodeURIComponent(section)}` : ""
-        }`
+        `${API_BASE_URL}/subject-attendance/students?assigned_subject_id=${selectedSubject}`
       );
 
       if (!studentsResponse.ok) {
-        const errorData = await studentsResponse.json().catch(() => null);
+        const errorData = await studentsResponse
+          .json()
+          .catch(() => null);
 
         throw new Error(
           errorData?.detail || "Failed to load students."
@@ -124,13 +122,13 @@ function SubjectAttendance() {
       // ------------------------------------------------------
 
       const attendanceResponse = await fetch(
-        `${API_BASE_URL}/subject-attendance?assigned_subject_id=${selectedSubject}&attendance_date=${selectedDate}${
-          section ? `&section=${encodeURIComponent(section)}` : ""
-        }`
+        `${API_BASE_URL}/subject-attendance?assigned_subject_id=${selectedSubject}&attendance_date=${selectedDate}`
       );
 
       if (!attendanceResponse.ok) {
-        const errorData = await attendanceResponse.json().catch(() => null);
+        const errorData = await attendanceResponse
+          .json()
+          .catch(() => null);
 
         throw new Error(
           errorData?.detail ||
@@ -332,7 +330,8 @@ function SubjectAttendance() {
     }
 
     const subject = subjects.find(
-      (item) => String(item.id) === String(selectedSubject)
+      (item) =>
+        String(item.id) === String(selectedSubject)
     );
 
     if (!subject) {
@@ -370,7 +369,7 @@ Total Students: ${students.length}
 🟠 OD: ${odCount}
 
 Attendance has been recorded successfully.
-    `.trim();
+`.trim();
 
     const whatsappUrl =
       `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -410,7 +409,8 @@ Attendance has been recorded successfully.
       attendance[student.student_id] === "OD"
   ).length;
 
-  const unmarkedCount = students.length -
+  const unmarkedCount =
+    students.length -
     presentCount -
     absentCount -
     odCount;
@@ -427,7 +427,6 @@ Attendance has been recorded successfully.
       ===================================================== */}
 
       <div style={styles.header}>
-
         <div>
           <h1 style={styles.title}>
             Subject Attendance
@@ -437,7 +436,6 @@ Attendance has been recorded successfully.
             Manage attendance for individual subjects
           </p>
         </div>
-
       </div>
 
 
@@ -518,51 +516,6 @@ Attendance has been recorded successfully.
 
           </div>
 
-
-          {/* SECTION */}
-
-          <div style={styles.formGroup}>
-
-            <label style={styles.label}>
-              Section
-            </label>
-
-            <select
-              value={section}
-              onChange={(e) => {
-                setSection(e.target.value);
-                setStudents([]);
-                setAttendance({});
-                setMessage("");
-                setError("");
-              }}
-              style={styles.select}
-            >
-
-              <option value="">
-                All Sections
-              </option>
-
-              <option value="A">
-                Section A
-              </option>
-
-              <option value="B">
-                Section B
-              </option>
-
-              <option value="C">
-                Section C
-              </option>
-
-              <option value="D">
-                Section D
-              </option>
-
-            </select>
-
-          </div>
-
         </div>
 
 
@@ -571,75 +524,89 @@ Attendance has been recorded successfully.
         {selectedSubjectData && (
           <div style={styles.subjectInfo}>
 
-            <div>
+            <div style={styles.infoItem}>
               <span style={styles.infoLabel}>
                 Subject
               </span>
 
-              <strong>
+              <span style={styles.infoValue}>
                 {selectedSubjectData.subject_name}
-              </strong>
+              </span>
             </div>
 
-            <div>
+            <div style={styles.infoItem}>
               <span style={styles.infoLabel}>
                 Code
               </span>
 
-              <strong>
+              <span style={styles.infoValue}>
                 {selectedSubjectData.subject_code}
-              </strong>
+              </span>
             </div>
 
-            <div>
+            <div style={styles.infoItem}>
               <span style={styles.infoLabel}>
                 Batch
               </span>
 
-              <strong>
+              <span style={styles.infoValue}>
                 {selectedSubjectData.batch}
-              </strong>
+              </span>
             </div>
 
-            <div>
+            <div style={styles.infoItem}>
               <span style={styles.infoLabel}>
                 Semester
               </span>
 
-              <strong>
+              <span style={styles.infoValue}>
                 {selectedSubjectData.semester}
-              </strong>
+              </span>
             </div>
 
           </div>
         )}
 
 
-        {/* LOAD BUTTON */}
+        {/* LOAD + CLEAR */}
 
-        <button
-          onClick={loadStudents}
-          disabled={
-            loadingStudents ||
-            !selectedSubject ||
-            !selectedDate
-          }
-          style={{
-            ...styles.primaryButton,
-            opacity:
+        <div style={styles.selectionActions}>
+
+          <button
+            onClick={loadStudents}
+            disabled={
               loadingStudents ||
               !selectedSubject ||
               !selectedDate
-                ? 0.6
-                : 1,
-          }}
-        >
+            }
+            style={{
+              ...styles.primaryButton,
+              opacity:
+                loadingStudents ||
+                !selectedSubject ||
+                !selectedDate
+                  ? 0.6
+                  : 1,
+            }}
+          >
+            {loadingStudents
+              ? "Loading Students..."
+              : "Load Students"}
+          </button>
 
-          {loadingStudents
-            ? "Loading Students..."
-            : "Load Students"}
+          <button
+            onClick={() => {
+              setStudents([]);
+              setAttendance({});
+              setMessage("");
+              setError("");
+            }}
+            style={styles.topClearButton}
+          >
+            Clear
+          </button>
 
-        </button>
+        </div>
 
       </div>
 
@@ -650,13 +617,15 @@ Attendance has been recorded successfully.
 
       {message && (
         <div style={styles.successMessage}>
-          ✓ {message}
+          <span style={styles.messageIcon}>✓</span>
+          {message}
         </div>
       )}
 
       {error && (
         <div style={styles.errorMessage}>
-          ⚠ {error}
+          <span style={styles.messageIcon}>!</span>
+          {error}
         </div>
       )}
 
@@ -674,7 +643,6 @@ Attendance has been recorded successfully.
           <div style={styles.tableHeader}>
 
             <div>
-
               <h2 style={styles.cardTitle}>
                 Student Attendance
               </h2>
@@ -682,7 +650,6 @@ Attendance has been recorded successfully.
               <p style={styles.studentCount}>
                 {students.length} students
               </p>
-
             </div>
 
 
@@ -757,11 +724,21 @@ Attendance has been recorded successfully.
 
                 <tr>
 
-                  <th style={styles.th}>
+                  <th
+                    style={{
+                      ...styles.th,
+                      width: "55px",
+                    }}
+                  >
                     #
                   </th>
 
-                  <th style={styles.th}>
+                  <th
+                    style={{
+                      ...styles.th,
+                      width: "180px",
+                    }}
+                  >
                     Register Number
                   </th>
 
@@ -769,11 +746,12 @@ Attendance has been recorded successfully.
                     Student Name
                   </th>
 
-                  <th style={styles.th}>
-                    Section
-                  </th>
-
-                  <th style={styles.th}>
+                  <th
+                    style={{
+                      ...styles.th,
+                      minWidth: "350px",
+                    }}
+                  >
                     Attendance
                   </th>
 
@@ -796,28 +774,47 @@ Attendance has been recorded successfully.
                       style={styles.tr}
                     >
 
+                      {/* # */}
+
                       <td style={styles.td}>
                         {index + 1}
                       </td>
 
+
+                      {/* REGISTER NUMBER */}
+
                       <td
                         style={{
                           ...styles.td,
-                          fontWeight: "600",
+                          fontWeight: "500",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {student.register_number}
                       </td>
 
-                      <td style={styles.td}>
+
+                      {/* STUDENT NAME */}
+
+                      <td
+                        style={{
+                          ...styles.td,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {student.student_name}
                       </td>
 
-                      <td style={styles.td}>
-                        {student.section || "-"}
-                      </td>
 
-                      <td style={styles.td}>
+                      {/* ATTENDANCE */}
+
+                      <td
+                        style={{
+                          ...styles.td,
+                          paddingLeft: "24px",
+                          paddingRight: "18px",
+                        }}
+                      >
 
                         <div style={styles.statusContainer}>
 
@@ -832,12 +829,10 @@ Attendance has been recorded successfully.
                             }
                             style={{
                               ...styles.statusButton,
-                              ...(
-                                currentStatus ===
-                                "Present"
-                                  ? styles.presentSelected
-                                  : {}
-                              ),
+                              ...(currentStatus ===
+                              "Present"
+                                ? styles.presentSelected
+                                : {}),
                             }}
                           >
                             ✓ Present
@@ -855,12 +850,10 @@ Attendance has been recorded successfully.
                             }
                             style={{
                               ...styles.statusButton,
-                              ...(
-                                currentStatus ===
-                                "Absent"
-                                  ? styles.absentSelected
-                                  : {}
-                              ),
+                              ...(currentStatus ===
+                              "Absent"
+                                ? styles.absentSelected
+                                : {}),
                             }}
                           >
                             ✕ Absent
@@ -878,11 +871,9 @@ Attendance has been recorded successfully.
                             }
                             style={{
                               ...styles.statusButton,
-                              ...(
-                                currentStatus === "OD"
-                                  ? styles.odSelected
-                                  : {}
-                              ),
+                              ...(currentStatus === "OD"
+                                ? styles.odSelected
+                                : {}),
                             }}
                           >
                             ● OD
@@ -895,7 +886,6 @@ Attendance has been recorded successfully.
                     </tr>
 
                   );
-
                 })}
 
               </tbody>
@@ -919,11 +909,9 @@ Attendance has been recorded successfully.
                 opacity: saving ? 0.6 : 1,
               }}
             >
-
               {saving
                 ? "Saving..."
                 : "Save Attendance"}
-
             </button>
 
 
@@ -954,11 +942,11 @@ Attendance has been recorded successfully.
               👥
             </div>
 
-            <h3>
+            <h3 style={styles.emptyTitle}>
               No Students Loaded
             </h3>
 
-            <p>
+            <p style={styles.emptyText}>
               Select a subject and date, then click
               "Load Students".
             </p>
@@ -979,162 +967,218 @@ const styles = {
 
   page: {
     minHeight: "100vh",
-    padding: "30px",
+    padding: "28px 30px 40px",
     background: "#f5f7fb",
     boxSizing: "border-box",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
   },
 
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "25px",
+    marginBottom: "24px",
   },
 
   title: {
     margin: 0,
-    fontSize: "30px",
-    fontWeight: "700",
-    color: "#1f2937",
+    fontSize: "28px",
+    fontWeight: "650",
+    color: "#1e3a8a",
+    letterSpacing: "-0.3px",
   },
 
   subtitle: {
-    marginTop: "7px",
+    marginTop: "6px",
     marginBottom: 0,
     color: "#6b7280",
-    fontSize: "15px",
+    fontSize: "14px",
   },
 
   card: {
     background: "#ffffff",
     borderRadius: "14px",
-    padding: "25px",
-    marginBottom: "25px",
+    padding: "24px",
+    marginBottom: "22px",
     boxShadow:
-      "0 2px 10px rgba(0, 0, 0, 0.06)",
+      "0 2px 10px rgba(15, 23, 42, 0.06)",
+    border: "1px solid #eef2f7",
   },
 
   cardTitle: {
     margin: 0,
     color: "#1f2937",
-    fontSize: "20px",
-    fontWeight: "650",
+    fontSize: "19px",
+    fontWeight: "600",
   },
 
   formGrid: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "20px",
-    marginTop: "22px",
-    marginBottom: "20px",
+      "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "18px",
+    marginTop: "20px",
+    marginBottom: "18px",
   },
 
   formGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "7px",
   },
 
   label: {
-    fontSize: "14px",
-    fontWeight: "600",
+    fontSize: "13px",
+    fontWeight: "500",
     color: "#374151",
   },
 
   select: {
     width: "100%",
-    padding: "12px 14px",
+    height: "44px",
+    padding: "0 12px",
     border: "1px solid #d1d5db",
     borderRadius: "8px",
     background: "#ffffff",
     color: "#111827",
     fontSize: "14px",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
     outline: "none",
     boxSizing: "border-box",
+    cursor: "pointer",
   },
 
   input: {
-    width: "100%",
-    padding: "11px 14px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    background: "#ffffff",
-    color: "#111827",
-    fontSize: "14px",
-    outline: "none",
-    boxSizing: "border-box",
-  },
+  width: "100%",
+  height: "44px",
+  padding: "0 12px",
+  border: "1px solid #d1d5db",
+  borderRadius: "8px",
+  background: "#ffffff",
+  color: "#111827",
+  fontSize: "14px",
+  fontFamily: '"Segoe UI", "Inter", "Arial", sans-serif',
+  outline: "none",
+  boxSizing: "border-box",
+},
 
   subjectInfo: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit, minmax(150px, 1fr))",
-    gap: "15px",
+      "minmax(220px, 2fr) repeat(3, minmax(120px, 1fr))",
+    gap: "14px",
     background: "#f8fafc",
     borderRadius: "10px",
-    padding: "16px",
-    marginBottom: "20px",
+    padding: "15px 16px",
+    marginBottom: "18px",
+    border: "1px solid #eef2f7",
+  },
+
+  infoItem: {
+    minWidth: 0,
   },
 
   infoLabel: {
     display: "block",
-    fontSize: "12px",
+    fontSize: "11px",
     color: "#6b7280",
     marginBottom: "4px",
+  },
+
+  infoValue: {
+    display: "block",
+    color: "#374151",
+    fontSize: "13px",
+    fontWeight: "500",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+
+  selectionActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    flexWrap: "wrap",
   },
 
   primaryButton: {
     border: "none",
     borderRadius: "8px",
-    padding: "12px 22px",
-    background: "#2563eb",
+    padding: "11px 20px",
+    background: "#1e3a8a",
     color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "600",
+    fontSize: "13px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
+    cursor: "pointer",
+    transition: "0.2s",
+  },
+
+  topClearButton: {
+    border: "1px solid #d1d5db",
+    borderRadius: "8px",
+    padding: "10px 19px",
+    background: "#ffffff",
+    color: "#4b5563",
+    fontSize: "13px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
     cursor: "pointer",
   },
 
   successMessage: {
+    display: "flex",
+    alignItems: "center",
+    gap: "9px",
     background: "#ecfdf5",
     color: "#047857",
     border: "1px solid #a7f3d0",
     borderRadius: "8px",
-    padding: "13px 16px",
-    marginBottom: "20px",
-    fontSize: "14px",
-    fontWeight: "500",
+    padding: "12px 15px",
+    marginBottom: "18px",
+    fontSize: "13px",
   },
 
   errorMessage: {
+    display: "flex",
+    alignItems: "center",
+    gap: "9px",
     background: "#fef2f2",
     color: "#b91c1c",
     border: "1px solid #fecaca",
     borderRadius: "8px",
-    padding: "13px 16px",
-    marginBottom: "20px",
-    fontSize: "14px",
-    fontWeight: "500",
+    padding: "12px 15px",
+    marginBottom: "18px",
+    fontSize: "13px",
+  },
+
+  messageIcon: {
+    fontWeight: "700",
   },
 
   tableHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: "20px",
-    marginBottom: "20px",
+    gap: "18px",
+    marginBottom: "18px",
     flexWrap: "wrap",
   },
 
   studentCount: {
     margin: "5px 0 0",
     color: "#6b7280",
-    fontSize: "13px",
+    fontSize: "12px",
   },
 
   quickActions: {
     display: "flex",
-    gap: "8px",
+    gap: "9px",
     flexWrap: "wrap",
   },
 
@@ -1142,45 +1186,51 @@ const styles = {
     border: "1px solid #86efac",
     background: "#f0fdf4",
     color: "#15803d",
-    padding: "9px 13px",
+    padding: "8px 12px",
     borderRadius: "7px",
     cursor: "pointer",
-    fontSize: "13px",
-    fontWeight: "600",
+    fontSize: "12px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
   },
 
   absentButton: {
     border: "1px solid #fca5a5",
     background: "#fef2f2",
     color: "#dc2626",
-    padding: "9px 13px",
+    padding: "8px 12px",
     borderRadius: "7px",
     cursor: "pointer",
-    fontSize: "13px",
-    fontWeight: "600",
+    fontSize: "12px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
   },
 
   clearButton: {
     border: "1px solid #d1d5db",
     background: "#ffffff",
     color: "#4b5563",
-    padding: "9px 13px",
+    padding: "8px 13px",
     borderRadius: "7px",
     cursor: "pointer",
-    fontSize: "13px",
-    fontWeight: "600",
+    fontSize: "12px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
   },
 
   summaryContainer: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit, minmax(130px, 1fr))",
+      "repeat(4, minmax(120px, 1fr))",
     gap: "12px",
-    marginBottom: "22px",
+    marginBottom: "20px",
   },
 
   summaryPresent: {
-    padding: "14px",
+    padding: "12px 14px",
     borderRadius: "9px",
     background: "#f0fdf4",
     border: "1px solid #bbf7d0",
@@ -1188,10 +1238,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    fontSize: "13px",
   },
 
   summaryAbsent: {
-    padding: "14px",
+    padding: "12px 14px",
     borderRadius: "9px",
     background: "#fef2f2",
     border: "1px solid #fecaca",
@@ -1199,10 +1250,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    fontSize: "13px",
   },
 
   summaryOD: {
-    padding: "14px",
+    padding: "12px 14px",
     borderRadius: "9px",
     background: "#fff7ed",
     border: "1px solid #fed7aa",
@@ -1210,10 +1262,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    fontSize: "13px",
   },
 
   summaryUnmarked: {
-    padding: "14px",
+    padding: "12px 14px",
     borderRadius: "9px",
     background: "#f9fafb",
     border: "1px solid #e5e7eb",
@@ -1221,6 +1274,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    fontSize: "13px",
   },
 
   tableWrapper: {
@@ -1233,45 +1287,54 @@ const styles = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    minWidth: "800px",
+    minWidth: "850px",
   },
 
   th: {
-    padding: "14px 12px",
+    padding: "13px 14px",
     textAlign: "left",
     background: "#f8fafc",
     color: "#374151",
-    fontSize: "13px",
-    fontWeight: "700",
+    fontSize: "12px",
+    fontWeight: "600",
     borderBottom: "1px solid #e5e7eb",
   },
 
   td: {
-    padding: "13px 12px",
+    padding: "14px",
     color: "#374151",
-    fontSize: "14px",
+    fontSize: "13px",
     borderBottom: "1px solid #f1f5f9",
+    textAlign: "left",
+    verticalAlign: "middle",
   },
 
   tr: {
     background: "#ffffff",
+    transition: "background 0.15s",
   },
 
   statusContainer: {
     display: "flex",
-    gap: "7px",
-    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "12px",
+    flexWrap: "nowrap",
   },
 
   statusButton: {
-    padding: "7px 11px",
-    borderRadius: "6px",
+    minWidth: "88px",
+    padding: "8px 12px",
+    borderRadius: "7px",
     border: "1px solid #d1d5db",
     background: "#ffffff",
     color: "#4b5563",
     cursor: "pointer",
     fontSize: "12px",
-    fontWeight: "600",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
+    transition:
+      "background 0.15s, border-color 0.15s, transform 0.15s",
   },
 
   presentSelected: {
@@ -1295,46 +1358,64 @@ const styles = {
   footerActions: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "12px",
-    marginTop: "22px",
+    gap: "10px",
+    marginTop: "20px",
     flexWrap: "wrap",
   },
 
   saveButton: {
     border: "none",
     borderRadius: "8px",
-    padding: "12px 24px",
-    background: "#2563eb",
+    padding: "11px 21px",
+    background: "#1e3a8a",
     color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "700",
+    fontSize: "13px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
     cursor: "pointer",
   },
 
   whatsappButton: {
     border: "none",
     borderRadius: "8px",
-    padding: "12px 24px",
+    padding: "11px 21px",
     background: "#25d366",
     color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "700",
+    fontSize: "13px",
+    fontWeight: "500",
+    fontFamily:
+      '"Segoe UI", "Inter", Arial, sans-serif',
     cursor: "pointer",
   },
 
   emptyState: {
     background: "#ffffff",
     borderRadius: "14px",
-    padding: "50px 25px",
+    padding: "45px 25px",
     textAlign: "center",
     boxShadow:
-      "0 2px 10px rgba(0, 0, 0, 0.05)",
+      "0 2px 10px rgba(15, 23, 42, 0.05)",
+    border: "1px solid #eef2f7",
     color: "#6b7280",
   },
 
   emptyIcon: {
-    fontSize: "40px",
-    marginBottom: "10px",
+    fontSize: "36px",
+    marginBottom: "8px",
+  },
+
+  emptyTitle: {
+    margin: "0 0 6px",
+    color: "#374151",
+    fontSize: "17px",
+    fontWeight: "600",
+  },
+
+  emptyText: {
+    margin: 0,
+    color: "#6b7280",
+    fontSize: "13px",
   },
 };
 
