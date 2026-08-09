@@ -49,7 +49,7 @@ function MySubjects() {
       return;
     }
 
-    fetch(`http://127.0.0.1:8000/subjects/${semester}`)
+    fetch(`/api/subjects/${semester}`)
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((item) => {
@@ -82,7 +82,7 @@ function MySubjects() {
     }
 
     fetch(
-      `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+      `/api/assigned-subjects?batch=${batch}&semester=${semester}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -101,7 +101,7 @@ function MySubjects() {
   const loadAllSubjects = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/assigned-subjects/all"
+        "/api/assigned-subjects/all"
       );
 
       const data = await response.json();
@@ -138,7 +138,7 @@ function MySubjects() {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/assigned-subjects",
+        "/api/assigned-subjects",
         {
           method: "POST",
           headers: {
@@ -163,7 +163,7 @@ function MySubjects() {
       alert("Subject Added Successfully");
 
       const updated = await fetch(
-        `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+        `/api/assigned-subjects?batch=${batch}&semester=${semester}`
       );
 
       const updatedData = await updated.json();
@@ -192,7 +192,7 @@ function MySubjects() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/assigned-subjects/${id}`,
+        `/api/assigned-subjects/${id}`,
         {
           method: "DELETE",
         }
@@ -206,7 +206,7 @@ function MySubjects() {
       }
 
       const updated = await fetch(
-        `http://127.0.0.1:8000/assigned-subjects?batch=${batch}&semester=${semester}`
+        `/api/assigned-subjects?batch=${batch}&semester=${semester}`
       );
 
       const updatedData = await updated.json();

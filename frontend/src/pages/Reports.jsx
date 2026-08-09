@@ -41,7 +41,7 @@ function Reports() {
   const fetchStudents = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/report?batch=${batch}&filter=${cgpaFilter}&sort=${sort}`
+        `/api/report?batch=${batch}&filter=${cgpaFilter}&sort=${sort}`
       );
 
       const data = await response.json();
@@ -59,7 +59,7 @@ function Reports() {
 
   const generatePDF = () => {
     window.open(
-      `http://127.0.0.1:8000/export-pdf?batch=${batch}`,
+      `/api/export-pdf?batch=${batch}`,
       "_blank"
     );
   };
@@ -70,7 +70,7 @@ function Reports() {
 
   const generateExcel = () => {
     window.open(
-      `http://127.0.0.1:8000/export-excel?batch=${batch}`,
+      `/api/export-excel?batch=${batch}`,
       "_blank"
     );
   };

@@ -48,7 +48,7 @@ function StudentProfile() {
   const fetchStudent = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/students"
+        "/api/students"
       );
 
       const students = await response.json();
@@ -62,7 +62,7 @@ function StudentProfile() {
       }
 
       const response2 = await fetch(
-        `http://127.0.0.1:8000/student/${currentStudent.id}`
+        `/api/student/${currentStudent.id}`
       );
 
       const data = await response2.json();
@@ -70,7 +70,7 @@ function StudentProfile() {
       setStudent(data);
 
       const historyResponse = await fetch(
-        `http://127.0.0.1:8000/student/${currentStudent.id}/arrear-history`
+        `/api/student/${currentStudent.id}/arrear-history`
       );
 
       const historyData = await historyResponse.json();
@@ -95,7 +95,7 @@ function StudentProfile() {
     if (!confirmDelete) return;
 
     await fetch(
-      `http://127.0.0.1:8000/semester/${id}`,
+      `/api/semester/${id}`,
       {
         method: "DELETE",
       }

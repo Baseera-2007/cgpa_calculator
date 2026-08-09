@@ -47,7 +47,7 @@ function UploadResult() {
       formData.append("file", selectedFile);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/upload-pdf",
+        "/api/upload-pdf",
         {
           method: "POST",
           body: formData,

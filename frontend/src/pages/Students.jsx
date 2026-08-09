@@ -84,7 +84,7 @@ function Students() {
       setLoading(true);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/students"
+        "/api/students"
       );
 
       const data = await response.json();
@@ -182,7 +182,7 @@ function Students() {
   const handleView = async (id) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/student/${id}`
+        `/api/student/${id}`
       );
 
       const data = await response.json();

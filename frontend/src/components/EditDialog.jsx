@@ -38,7 +38,7 @@ function EditDialog({ open, onClose, student, onSave }) {
   const handleSave = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/student/${student.id}`,
+        `/api/student/${student.id}`,
         {
           method: "PUT",
           headers: {
