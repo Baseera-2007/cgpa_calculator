@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import {
   Paper,
   Typography,
@@ -18,7 +19,6 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function SigninForm() {
-
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +27,7 @@ function SigninForm() {
     role: "student",
     username: "",
     password: "",
+    faculty_id: "",
   });
 
   const handleChange = (e) => {
@@ -37,35 +38,48 @@ function SigninForm() {
   };
 
   const handleSignin = async (e) => {
-
     e.preventDefault();
 
     try {
-
-      const response = await fetch(
-        "/api/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: formData.username,
-            password: formData.password,
-          }),
-        }
-      );
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          role: formData.role,
+          faculty_id:
+            formData.role === "staff"
+              ? formData.faculty_id
+              : null,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.detail);
+        alert(data.detail || "Login failed");
         return;
       }
 
       localStorage.setItem("username", data.username);
       localStorage.setItem("role", data.role);
-      localStorage.setItem("register_number", data.register_number);
+
+      if (data.register_number) {
+        localStorage.setItem(
+          "register_number",
+          data.register_number
+        );
+      }
+
+      if (data.faculty_id) {
+        localStorage.setItem(
+          "faculty_id",
+          data.faculty_id
+        );
+      }
 
       alert("Login Successful 🎉");
 
@@ -76,10 +90,9 @@ function SigninForm() {
       }
 
     } catch (err) {
-      console.log(err);
+      console.log("LOGIN ERROR:", err);
       alert("Server Error");
     }
-
   };
 
   return (
@@ -105,6 +118,7 @@ function SigninForm() {
 
       <Box component="form" onSubmit={handleSignin}>
 
+        {/* Login As */}
         <FormControl fullWidth margin="normal">
           <InputLabel>Login As</InputLabel>
 
@@ -114,11 +128,17 @@ function SigninForm() {
             value={formData.role}
             onChange={handleChange}
           >
-            <MenuItem value="student">Student</MenuItem>
-            <MenuItem value="staff">Staff</MenuItem>
+            <MenuItem value="student">
+              Student
+            </MenuItem>
+
+            <MenuItem value="staff">
+              Staff
+            </MenuItem>
           </Select>
         </FormControl>
 
+        {/* Username */}
         <TextField
           fullWidth
           margin="normal"
@@ -128,6 +148,19 @@ function SigninForm() {
           onChange={handleChange}
         />
 
+        {/* Faculty ID - Staff only */}
+        {formData.role === "staff" && (
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Faculty ID"
+            name="faculty_id"
+            value={formData.faculty_id}
+            onChange={handleChange}
+          />
+        )}
+
+        {/* Password */}
         <TextField
           fullWidth
           margin="normal"
@@ -155,6 +188,7 @@ function SigninForm() {
           }}
         />
 
+        {/* Sign In Button */}
         <Button
           fullWidth
           variant="contained"
@@ -169,11 +203,13 @@ function SigninForm() {
           Sign In
         </Button>
 
+        {/* Sign Up */}
         <Typography
           align="center"
           sx={{ mt: 3 }}
         >
           Don't have an account?{" "}
+
           <Link
             to="/signup"
             style={{
