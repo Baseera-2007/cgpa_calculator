@@ -82,6 +82,8 @@ class SignupRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+    role: str
+    faculty_id: Optional[str] = None
 
 
 class StudentUpdate(BaseModel):
@@ -274,29 +276,52 @@ def login(login: LoginRequest):
 
     db = SessionLocal()
 
-    user = db.query(User).filter(
-        User.username == login.username,
-        User.password == login.password
-    ).first()
-
-    if not user:
-
-        db.close()
-
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid Username or Password"
+    try:
+        query = db.query(User).filter(
+            User.username == login.username,
+            User.password == login.password,
+            User.role == login.role
         )
 
-    response = {
-        "username": user.username,
-        "role": user.role,
-        "register_number": user.register_number
-    }
+        if login.role == "staff":
 
-    db.close()
+            if not login.faculty_id:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Faculty ID is required for staff login."
+                )
 
-    return response
+            query = query.filter(
+                User.faculty_id == login.faculty_id
+            )
+
+        user = query.first()
+
+        print(
+    "LOGIN DEBUG:",
+    login.username,
+    login.password,
+    login.role,
+    login.faculty_id,
+    "FOUND:",
+    user
+)
+
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid Username, Password, Role or Faculty ID"
+            )
+
+        return {
+            "username": user.username,
+            "role": user.role,
+            "register_number": user.register_number,
+            "faculty_id": user.faculty_id
+        }
+
+    finally:
+        db.close()
 
 
 # ==========================================================
