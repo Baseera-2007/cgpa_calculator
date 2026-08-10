@@ -6,4 +6,5 @@ reportlab==5.0.0
 SQLAlchemy==2.0.51
 uvicorn==0.35.0
 psycopg2-binary
-python-multipart   
+python-multipart
+python-dotenv
