@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://cgpa-system-backend.onrender.com/$1"
+    }
+  ]
+}
