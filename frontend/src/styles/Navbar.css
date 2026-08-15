@@ -1,3 +1,7 @@
+/* ==========================================================
+   NAVBAR
+   ========================================================== */
+
 .navbar {
   height: 70px;
   background: #1e3a8a;
@@ -16,7 +20,9 @@
 }
 
 
-/* LEFT SIDE */
+/* ==========================================================
+   LEFT SIDE
+   ========================================================== */
 
 .navbar-left {
   display: flex;
@@ -33,7 +39,9 @@
 }
 
 
-/* RIGHT SIDE */
+/* ==========================================================
+   RIGHT SIDE
+   ========================================================== */
 
 .navbar-right {
   display: flex;
@@ -46,7 +54,9 @@
 }
 
 
-/* WELCOME TEXT */
+/* ==========================================================
+   WELCOME TEXT
+   ========================================================== */
 
 .welcome-text {
   color: #dbeafe;
@@ -54,14 +64,18 @@
 }
 
 
-/* PROFILE AREA */
+/* ==========================================================
+   PROFILE AREA
+   ========================================================== */
 
 .profile-wrapper {
   position: relative;
 }
 
 
-/* NAME BUTTON */
+/* ==========================================================
+   NAME BUTTON
+   ========================================================== */
 
 .profile-button {
   display: flex;
@@ -91,14 +105,18 @@
 }
 
 
-/* USERNAME */
+/* ==========================================================
+   USERNAME
+   ========================================================== */
 
 .username {
   color: #ffffff;
 }
 
 
-/* DROPDOWN ARROW */
+/* ==========================================================
+   DROPDOWN ARROW
+   ========================================================== */
 
 .dropdown-arrow {
   font-size: 9px;
@@ -113,7 +131,9 @@
 }
 
 
-/* WAVE */
+/* ==========================================================
+   WAVE
+   ========================================================== */
 
 .wave {
   margin-left: 5px;
@@ -121,7 +141,9 @@
 }
 
 
-/* DROPDOWN MENU */
+/* ==========================================================
+   DROPDOWN MENU
+   ========================================================== */
 
 .profile-dropdown {
   position: absolute;
@@ -148,7 +170,9 @@
 }
 
 
-/* SMALL DROPDOWN ANIMATION */
+/* ==========================================================
+   DROPDOWN ANIMATION
+   ========================================================== */
 
 @keyframes dropdownOpen {
   from {
@@ -163,7 +187,9 @@
 }
 
 
-/* LOGOUT */
+/* ==========================================================
+   LOGOUT
+   ========================================================== */
 
 .logout-dropdown-btn {
   width: 100%;
@@ -202,8 +228,154 @@
 }
 
 
-/* LOGOUT ICON */
+/* ==========================================================
+   LOGOUT ICON
+   ========================================================== */
 
 .logout-dropdown-btn span {
   font-size: 16px;
+}
+
+
+/* ==========================================================
+   MOBILE MENU BUTTON
+   Hidden on desktop
+   ========================================================== */
+
+.mobile-menu-button {
+  display: none;
+
+  width: 42px;
+  height: 42px;
+
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  border: none;
+
+  color: #ffffff;
+
+  font-size: 24px;
+
+  cursor: pointer;
+
+  border-radius: 8px;
+
+  padding: 0;
+}
+
+.mobile-menu-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* ==========================================================
+   TABLET
+   ========================================================== */
+
+@media (max-width: 900px) {
+
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+
+  .navbar-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .navbar-left h2 {
+    font-size: 19px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (max-width: 600px) {
+
+  .navbar {
+    height: 64px;
+    padding: 0 12px;
+  }
+
+  .mobile-menu-button {
+    width: 40px;
+    height: 40px;
+
+    font-size: 23px;
+
+    margin-right: 8px;
+  }
+
+  .navbar-left h2 {
+    font-size: 17px;
+  }
+
+  .navbar-right {
+    font-size: 13px;
+  }
+
+  .welcome-text {
+    display: none;
+  }
+
+  .profile-button {
+    padding: 7px 5px;
+    font-size: 13px;
+  }
+
+  .wave {
+    font-size: 15px;
+    margin-left: 2px;
+  }
+
+}
+
+
+/* ==========================================================
+   VERY SMALL PHONES
+   ========================================================== */
+
+@media (max-width: 400px) {
+
+  .navbar {
+    padding: 0 8px;
+  }
+
+  .mobile-menu-button {
+    width: 38px;
+    height: 38px;
+
+    font-size: 21px;
+
+    margin-right: 5px;
+  }
+
+  .navbar-left h2 {
+    font-size: 15px;
+  }
+
+  .username {
+    max-width: 80px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
 }

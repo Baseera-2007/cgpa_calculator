@@ -1065,17 +1065,15 @@ const styles = {
 },
 
   subjectInfo: {
-    display: "grid",
-    gridTemplateColumns:
-      "minmax(220px, 2fr) repeat(3, minmax(120px, 1fr))",
-    gap: "14px",
-    background: "#f8fafc",
-    borderRadius: "10px",
-    padding: "15px 16px",
-    marginBottom: "18px",
-    border: "1px solid #eef2f7",
-  },
-
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: "14px",
+  background: "#f8fafc",
+  borderRadius: "10px",
+  padding: "15px 16px",
+  marginBottom: "18px",
+  border: "1px solid #eef2f7",
+},
   infoItem: {
     minWidth: 0,
   },
@@ -1221,13 +1219,12 @@ const styles = {
       '"Segoe UI", "Inter", Arial, sans-serif',
   },
 
-  summaryContainer: {
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(4, minmax(120px, 1fr))",
-    gap: "12px",
-    marginBottom: "20px",
-  },
+ summaryContainer: {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: "12px",
+  marginBottom: "20px",
+},
 
   summaryPresent: {
     padding: "12px 14px",

@@ -6,6 +6,8 @@ import {
   FaTrophy,
 } from "react-icons/fa";
 
+import "../styles/Dashboard.css";
+
 function Dashboard({ batch }) {
   const [dashboard, setDashboard] = useState({
     total_students: 0,
@@ -45,24 +47,23 @@ function Dashboard({ batch }) {
   };
 
   return (
-    <div style={styles.page}>
+    <div className="dashboard-page">
 
       {/* =====================================================
           DASHBOARD TITLE
       ===================================================== */}
 
-      <div style={styles.header}>
-        <h1 style={styles.title}>
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">
           Dashboard
         </h1>
       </div>
-
 
       {/* =====================================================
           OVERVIEW CARDS
       ===================================================== */}
 
-      <div style={styles.cardsGrid}>
+      <div className="dashboard-cards-grid">
 
         <Card
           color="#2563eb"
@@ -94,20 +95,19 @@ function Dashboard({ batch }) {
 
       </div>
 
-
       {/* =====================================================
           BOTTOM SECTION
       ===================================================== */}
 
-      <div style={styles.bottomGrid}>
+      <div className="dashboard-bottom-grid">
 
         {/* ===================================================
             BATCH INSIGHTS
         =================================================== */}
 
-        <div style={styles.sectionCard}>
+        <div className="dashboard-section-card">
 
-          <h2 style={styles.sectionTitle}>
+          <h2 className="dashboard-section-title">
             Batch Insights
           </h2>
 
@@ -144,14 +144,13 @@ function Dashboard({ batch }) {
 
         </div>
 
-
         {/* ===================================================
             TOP 5 STUDENTS
         =================================================== */}
 
-        <div style={styles.sectionCard}>
+        <div className="dashboard-section-card">
 
-          <h2 style={styles.sectionTitle}>
+          <h2 className="dashboard-section-title">
             Top 5 Students
           </h2>
 
@@ -169,7 +168,7 @@ function Dashboard({ batch }) {
 
           ) : (
 
-            <p style={styles.noData}>
+            <p className="dashboard-no-data">
               No student data available.
             </p>
 
@@ -190,40 +189,24 @@ function Dashboard({ batch }) {
 
 function Card({ icon, title, value, color }) {
   return (
-    <div
-      style={styles.card}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform =
-          "translateY(-4px)";
-
-        e.currentTarget.style.boxShadow =
-          "0 12px 28px rgba(0,0,0,0.10)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform =
-          "translateY(0)";
-
-        e.currentTarget.style.boxShadow =
-          "0 4px 16px rgba(0,0,0,0.06)";
-      }}
-    >
+    <div className="dashboard-card">
 
       <div
+        className="dashboard-card-icon"
         style={{
-          ...styles.cardIcon,
           background: color,
         }}
       >
         {icon}
       </div>
 
-      <div style={styles.cardContent}>
+      <div className="dashboard-card-content">
 
-        <div style={styles.cardTitle}>
+        <div className="dashboard-card-title">
           {title}
         </div>
 
-        <div style={styles.cardValue}>
+        <div className="dashboard-card-value">
           {value}
         </div>
 
@@ -241,19 +224,16 @@ function Card({ icon, title, value, color }) {
 function Insight({ label, value, last }) {
   return (
     <div
-      style={{
-        ...styles.insight,
-        borderBottom: last
-          ? "none"
-          : "1px solid #eef2f7",
-      }}
+      className={`dashboard-insight ${
+        last ? "dashboard-insight-last" : ""
+      }`}
     >
 
-      <span style={styles.insightLabel}>
+      <span className="dashboard-insight-label">
         {label}
       </span>
 
-      <span style={styles.insightValue}>
+      <span className="dashboard-insight-value">
         {value}
       </span>
 
@@ -268,21 +248,21 @@ function Insight({ label, value, last }) {
 
 function TopStudent({ rank, name, cgpa }) {
   return (
-    <div style={styles.topStudent}>
+    <div className="dashboard-top-student">
 
-      <div style={styles.studentLeft}>
+      <div className="dashboard-student-left">
 
-        <div style={styles.rank}>
+        <div className="dashboard-rank">
           {rank}
         </div>
 
-        <div style={styles.studentName}>
+        <div className="dashboard-student-name">
           {name}
         </div>
 
       </div>
 
-      <div style={styles.studentCgpa}>
+      <div className="dashboard-student-cgpa">
         {cgpa}
       </div>
 
@@ -290,205 +270,5 @@ function TopStudent({ rank, name, cgpa }) {
   );
 }
 
-
-// ==========================================================
-// STYLES
-// ==========================================================
-
-const styles = {
-
-  // --------------------------------------------------------
-  // PAGE
-  // --------------------------------------------------------
-
-  page: {
-    padding: "28px 32px",
-    minHeight: "100vh",
-    background: "#f8fafc",
-    boxSizing: "border-box",
-    fontFamily:
-      '"Segoe UI", "Inter", Arial, sans-serif',
-  },
-
-  // --------------------------------------------------------
-  // HEADER
-  // --------------------------------------------------------
-
-  header: {
-    marginBottom: "22px",
-  },
-
-  title: {
-    margin: 0,
-    color: "#1e3a8a",
-    fontSize: "27px",
-    fontWeight: "650",
-    letterSpacing: "-0.3px",
-  },
-
-  // --------------------------------------------------------
-  // OVERVIEW CARDS
-  // --------------------------------------------------------
-
-  cardsGrid: {
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(4, minmax(0, 1fr))",
-    gap: "18px",
-    marginBottom: "28px",
-  },
-
-  card: {
-    background: "#ffffff",
-    borderRadius: "14px",
-    padding: "22px",
-    border: "1px solid #e5e7eb",
-    boxShadow:
-      "0 4px 16px rgba(0,0,0,0.06)",
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-    transition:
-      "transform 0.2s ease, box-shadow 0.2s ease",
-    cursor: "default",
-  },
-
-  cardIcon: {
-    width: "52px",
-    height: "52px",
-    minWidth: "52px",
-    borderRadius: "12px",
-    color: "#ffffff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "21px",
-  },
-
-  cardContent: {
-    minWidth: 0,
-  },
-
-  cardTitle: {
-    color: "#6b7280",
-    fontSize: "13px",
-    fontWeight: "500",
-    marginBottom: "5px",
-    whiteSpace: "nowrap",
-  },
-
-  cardValue: {
-    color: "#1e3a8a",
-    fontSize: "27px",
-    fontWeight: "650",
-    lineHeight: "1.1",
-  },
-
-  // --------------------------------------------------------
-  // BOTTOM SECTION
-  // --------------------------------------------------------
-
-  bottomGrid: {
-    display: "grid",
-    gridTemplateColumns: "1.3fr 1fr",
-    gap: "22px",
-  },
-
-  sectionCard: {
-    background: "#ffffff",
-    borderRadius: "14px",
-    padding: "24px",
-    border: "1px solid #e5e7eb",
-    boxShadow:
-      "0 4px 16px rgba(0,0,0,0.05)",
-  },
-
-  sectionTitle: {
-    margin: "0 0 18px",
-    color: "#1e3a8a",
-    fontSize: "19px",
-    fontWeight: "650",
-  },
-
-  // --------------------------------------------------------
-  // BATCH INSIGHTS
-  // --------------------------------------------------------
-
-  insight: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px 2px",
-  },
-
-  insightLabel: {
-    color: "#6b7280",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
-
-  insightValue: {
-    color: "#1e3a8a",
-    fontSize: "14px",
-    fontWeight: "600",
-  },
-
-  // --------------------------------------------------------
-  // TOP STUDENTS
-  // --------------------------------------------------------
-
-  topStudent: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "11px 12px",
-    marginBottom: "9px",
-    borderRadius: "9px",
-    background: "#f8fafc",
-    border: "1px solid #f1f5f9",
-  },
-
-  studentLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    minWidth: 0,
-  },
-
-  rank: {
-    width: "32px",
-    height: "32px",
-    minWidth: "32px",
-    borderRadius: "8px",
-    background: "#1e3a8a",
-    color: "#ffffff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "13px",
-    fontWeight: "600",
-  },
-
-  studentName: {
-    color: "#374151",
-    fontSize: "14px",
-    fontWeight: "500",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-
-  studentCgpa: {
-    color: "#15803d",
-    fontSize: "15px",
-    fontWeight: "650",
-  },
-
-  noData: {
-    color: "#6b7280",
-    fontSize: "14px",
-    margin: 0,
-  },
-};
 
 export default Dashboard;

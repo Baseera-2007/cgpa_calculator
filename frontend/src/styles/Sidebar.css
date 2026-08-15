@@ -1,3 +1,7 @@
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
+
 .sidebar {
   width: 235px;
   min-height: calc(100vh - 70px);
@@ -11,17 +15,24 @@
   flex-shrink: 0;
 
   border-right: 1px solid #1e293b;
+
+  position: relative;
+  z-index: 900;
 }
 
 
-/* SIDEBAR MENU */
+/* ==========================================================
+   SIDEBAR MENU
+   ========================================================== */
 
 .sidebar-menu {
   width: 100%;
 }
 
 
-/* MENU LIST */
+/* ==========================================================
+   MENU LIST
+   ========================================================== */
 
 .sidebar ul {
   list-style: none;
@@ -31,14 +42,18 @@
 }
 
 
-/* MENU ITEM */
+/* ==========================================================
+   MENU ITEM
+   ========================================================== */
 
 .sidebar li {
   margin: 5px 0;
 }
 
 
-/* NAVIGATION LINK */
+/* ==========================================================
+   NAVIGATION LINK
+   ========================================================== */
 
 .sidebar a {
   display: flex;
@@ -69,7 +84,9 @@
 }
 
 
-/* ICON */
+/* ==========================================================
+   ICON
+   ========================================================== */
 
 .menu-icon {
   width: 28px;
@@ -84,7 +101,9 @@
 }
 
 
-/* HOVER */
+/* ==========================================================
+   HOVER
+   ========================================================== */
 
 .sidebar a:hover {
   background: #1e293b;
@@ -95,7 +114,9 @@
 }
 
 
-/* ACTIVE */
+/* ==========================================================
+   ACTIVE
+   ========================================================== */
 
 .sidebar a.active {
   background: #2563eb;
@@ -109,7 +130,9 @@
 }
 
 
-/* ACTIVE HOVER */
+/* ==========================================================
+   ACTIVE HOVER
+   ========================================================== */
 
 .sidebar a.active:hover {
   background: #2563eb;
@@ -120,20 +143,175 @@
 }
 
 
-/* RESPONSIVE */
+/* ==========================================================
+   MOBILE CLOSE BUTTON
+   Hidden on desktop
+   ========================================================== */
+
+.sidebar-close-button {
+  display: none;
+
+  background: transparent;
+  border: none;
+
+  color: #ffffff;
+
+  font-size: 22px;
+
+  width: 40px;
+  height: 40px;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  border-radius: 8px;
+
+  margin-left: auto;
+  margin-bottom: 10px;
+}
+
+.sidebar-close-button:hover {
+  background: #1e293b;
+}
+
+
+/* ==========================================================
+   MOBILE OVERLAY
+   Hidden on desktop
+   ========================================================== */
+
+.sidebar-overlay {
+  display: none;
+}
+
+
+/* ==========================================================
+   TABLET / MOBILE
+   ========================================================== */
 
 @media (max-width: 900px) {
+
   .sidebar {
-    width: 210px;
+    position: fixed;
+
+    top: 70px;
+    left: 0;
+
+    width: 235px;
+    height: calc(100vh - 70px);
+    min-height: 0;
+
+    padding: 18px 10px;
+
+    transform: translateX(-100%);
+
+    transition: transform 0.25s ease;
+
+    box-shadow:
+      8px 0 25px rgba(0, 0, 0, 0.2);
+
+    overflow-y: auto;
+
+    z-index: 1100;
   }
+
+
+  /* OPEN SIDEBAR */
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+
+  /* CLOSE BUTTON */
+
+  .sidebar-close-button {
+    display: flex;
+  }
+
+
+  /* OVERLAY */
+
+  .sidebar-overlay {
+    display: block;
+
+    position: fixed;
+
+    top: 70px;
+    left: 0;
+
+    width: 100%;
+    height: calc(100vh - 70px);
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 1050;
+  }
+
 
   .sidebar a {
     font-size: 14px;
+
     padding: 10px 12px;
   }
 
+
   .menu-icon {
     width: 25px;
+
     font-size: 15px;
+  }
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (max-width: 600px) {
+
+  .sidebar {
+    top: 64px;
+
+    height: calc(100vh - 64px);
+
+    width: 260px;
+  }
+
+
+  .sidebar-overlay {
+    top: 64px;
+
+    height: calc(100vh - 64px);
+  }
+
+
+  .sidebar a {
+    min-height: 46px;
+
+    font-size: 15px;
+
+    padding: 11px 14px;
+  }
+
+
+  .menu-icon {
+    width: 28px;
+
+    font-size: 16px;
+  }
+}
+
+
+/* ==========================================================
+   VERY SMALL PHONES
+   ========================================================== */
+
+@media (max-width: 400px) {
+
+  .sidebar {
+    width: 245px;
   }
 }

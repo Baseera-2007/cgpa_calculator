@@ -1,83 +1,150 @@
 import { NavLink } from "react-router-dom";
 import "../styles/Sidebar.css";
 
-function Sidebar() {
+function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const role = (localStorage.getItem("role") || "").toLowerCase();
 
+  const handleNavigation = () => {
+    // Close the mobile sidebar after selecting a page
+    if (setSidebarOpen) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
-    <aside className="sidebar">
+    <>
+      {/* MOBILE OVERLAY */}
+      {sidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-      <div className="sidebar-menu">
+      <aside
+        className={`sidebar ${
+          sidebarOpen ? "sidebar-open" : ""
+        }`}
+      >
 
-        <ul>
+        {/* MOBILE CLOSE BUTTON */}
+        <button
+          className="sidebar-close-button"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close navigation menu"
+        >
+          ✕
+        </button>
 
-          {role === "staff" ? (
-            <>
-              <li>
-                <NavLink to="/staff" end>
-                  <span className="menu-icon">🏠</span>
-                  <span>Dashboard</span>
-                </NavLink>
-              </li>
 
-              <li>
-                <NavLink to="/staff/students">
-                  <span className="menu-icon">👨‍🎓</span>
-                  <span>Students</span>
-                </NavLink>
-              </li>
+        <div className="sidebar-menu">
 
-              <li>
-                <NavLink to="/staff/my-subjects">
-                  <span className="menu-icon">📘</span>
-                  <span>My Subjects</span>
-                </NavLink>
-              </li>
+          <ul>
 
-              <li>
-                <NavLink to="/staff/subject-attendance">
-                  <span className="menu-icon">📚</span>
-                  <span>Subject Attendance</span>
-                </NavLink>
-              </li>
+            {role === "staff" ? (
+              <>
 
-              <li>
-                <NavLink to="/staff/attendance">
-                  <span className="menu-icon">📋</span>
-                  <span>Attendance</span>
-                </NavLink>
-              </li>
+                <li>
+                  <NavLink
+                    to="/staff"
+                    end
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">🏠</span>
+                    <span>Dashboard</span>
+                  </NavLink>
+                </li>
 
-              <li>
-                <NavLink to="/staff/reports">
-                  <span className="menu-icon">📄</span>
-                  <span>Reports</span>
-                </NavLink>
-              </li>
-            </>
-          ) : (
-            <>
-              <li>
-                <NavLink to="/student" end>
-                  <span className="menu-icon">📤</span>
-                  <span>Upload Results</span>
-                </NavLink>
-              </li>
 
-              <li>
-                <NavLink to="/student/profile">
-                  <span className="menu-icon">👤</span>
-                  <span>My Profile</span>
-                </NavLink>
-              </li>
-            </>
-          )}
+                <li>
+                  <NavLink
+                    to="/staff/students"
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">👨‍🎓</span>
+                    <span>Students</span>
+                  </NavLink>
+                </li>
 
-        </ul>
 
-      </div>
+                <li>
+                  <NavLink
+                    to="/staff/my-subjects"
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">📘</span>
+                    <span>My Subjects</span>
+                  </NavLink>
+                </li>
 
-    </aside>
+
+                <li>
+                  <NavLink
+                    to="/staff/subject-attendance"
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">📚</span>
+                    <span>Subject Attendance</span>
+                  </NavLink>
+                </li>
+
+
+                <li>
+                  <NavLink
+                    to="/staff/attendance"
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">📋</span>
+                    <span>Attendance</span>
+                  </NavLink>
+                </li>
+
+
+                <li>
+                  <NavLink
+                    to="/staff/reports"
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">📄</span>
+                    <span>Reports</span>
+                  </NavLink>
+                </li>
+
+              </>
+            ) : (
+              <>
+
+                <li>
+                  <NavLink
+                    to="/student"
+                    end
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">📤</span>
+                    <span>Upload Results</span>
+                  </NavLink>
+                </li>
+
+
+                <li>
+                  <NavLink
+                    to="/student/profile"
+                    onClick={handleNavigation}
+                  >
+                    <span className="menu-icon">👤</span>
+                    <span>My Profile</span>
+                  </NavLink>
+                </li>
+
+              </>
+            )}
+
+          </ul>
+
+        </div>
+
+      </aside>
+    </>
   );
 }
 

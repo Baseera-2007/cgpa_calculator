@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
 
-function Navbar() {
+function Navbar({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,7 +18,7 @@ function Navbar() {
     navigate("/");
   };
 
-  // Close dropdown when clicking outside
+  // Close profile dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -42,6 +42,16 @@ function Navbar() {
   return (
     <nav className="navbar">
 
+      {/* MOBILE SIDEBAR BUTTON */}
+      <button
+        className="mobile-menu-button"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle navigation menu"
+      >
+        {sidebarOpen ? "✕" : "☰"}
+      </button>
+
+
       {/* LEFT SIDE */}
       <div className="navbar-left">
 
@@ -59,7 +69,7 @@ function Navbar() {
       <div className="navbar-right">
 
         <span className="welcome-text">
-          Welcome,{" "}
+          Welcome,
         </span>
 
 

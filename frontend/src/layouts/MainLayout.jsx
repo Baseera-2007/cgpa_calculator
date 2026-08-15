@@ -1,11 +1,17 @@
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { Outlet } from "react-router-dom";
 
 function MainLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <>
-      <Navbar />
+      <Navbar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
       <div
         style={{
@@ -14,7 +20,10 @@ function MainLayout() {
           background: "#f5f7fb",
         }}
       >
-        <Sidebar />
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
 
         <div
           style={{
