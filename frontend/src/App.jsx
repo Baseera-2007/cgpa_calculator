@@ -8,6 +8,8 @@ import MainLayout from "./layouts/MainLayout";
 // Authentication
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyCode from "./pages/VerifyCode";
 
 // Staff Pages
 import Home from "./pages/Home";
@@ -27,6 +29,8 @@ function App() {
       {/* Authentication */}
       <Route path="/" element={<Signin />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verify-code" element={<VerifyCode />} />
 
       {/* Staff Portal */}
       <Route path="/staff" element={<MainLayout />}>

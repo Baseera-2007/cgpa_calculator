@@ -25,9 +25,9 @@ function SigninForm() {
 
   const [formData, setFormData] = useState({
     role: "student",
-    username: "",
-    password: "",
+    register_number: "",
     faculty_id: "",
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -46,10 +46,16 @@ function SigninForm() {
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({
-          username: formData.username,
           password: formData.password,
           role: formData.role,
+
+          register_number:
+            formData.role === "student"
+              ? formData.register_number
+              : null,
+
           faculty_id:
             formData.role === "staff"
               ? formData.faculty_id
@@ -60,7 +66,12 @@ function SigninForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.detail || "Login failed");
+        const errorMessage =
+          typeof data.detail === "string"
+            ? data.detail
+            : "Login failed";
+
+        alert(errorMessage);
         return;
       }
 
@@ -97,29 +108,50 @@ function SigninForm() {
 
   return (
     <Paper
-      elevation={5}
+      elevation={3}
       sx={{
-        width: 450,
-        p: 5,
-        borderRadius: 4,
+        width: 430,
+        maxWidth: "100%",
+        p: { xs: 3, sm: 4 },
+        borderRadius: 3,
+        backgroundColor: "#ffffff",
+        border: "1px solid #e5edf8",
       }}
     >
+      {/* Title */}
       <Typography
         variant="h4"
         align="center"
         sx={{
           color: "#1e3a8a",
-          fontWeight: "bold",
-          mb: 4,
+          fontWeight: 700,
+          mb: 1,
         }}
       >
         Sign In
       </Typography>
 
+      {/* Subtitle */}
+      <Typography
+        align="center"
+        sx={{
+          color: "#64748b",
+          fontSize: "0.95rem",
+          mb: 3,
+        }}
+      >
+        Access your academic dashboard
+      </Typography>
+
       <Box component="form" onSubmit={handleSignin}>
 
         {/* Login As */}
-        <FormControl fullWidth margin="normal">
+        <FormControl
+          fullWidth
+          sx={{
+            mb: 2,
+          }}
+        >
           <InputLabel>Login As</InputLabel>
 
           <Select
@@ -127,48 +159,74 @@ function SigninForm() {
             label="Login As"
             value={formData.role}
             onChange={handleChange}
+            sx={{
+              borderRadius: 2,
+              backgroundColor: "#fbfdff",
+            }}
           >
             <MenuItem value="student">
               Student
             </MenuItem>
 
             <MenuItem value="staff">
-              Staff
+              Faculty
             </MenuItem>
           </Select>
         </FormControl>
 
-        {/* Username */}
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Username"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-        />
+        {/* Student Register Number */}
+        {formData.role === "student" && (
+          <TextField
+            fullWidth
+            label="Register Number"
+            name="register_number"
+            value={formData.register_number}
+            onChange={handleChange}
+            required
+            sx={{
+              mb: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "#fbfdff",
+              },
+            }}
+          />
+        )}
 
-        {/* Faculty ID - Staff only */}
+        {/* Faculty ID */}
         {formData.role === "staff" && (
           <TextField
             fullWidth
-            margin="normal"
             label="Faculty ID"
             name="faculty_id"
             value={formData.faculty_id}
             onChange={handleChange}
+            required
+            sx={{
+              mb: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "#fbfdff",
+              },
+            }}
           />
         )}
 
         {/* Password */}
         <TextField
           fullWidth
-          margin="normal"
           label="Password"
           type={showPassword ? "text" : "password"}
           name="password"
           value={formData.password}
           onChange={handleChange}
+          required
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              backgroundColor: "#fbfdff",
+            },
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -176,6 +234,7 @@ function SigninForm() {
                   onClick={() =>
                     setShowPassword(!showPassword)
                   }
+                  edge="end"
                 >
                   {showPassword ? (
                     <VisibilityOff />
@@ -188,6 +247,27 @@ function SigninForm() {
           }}
         />
 
+        {/* Forgot Password */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            mt: 1,
+          }}
+        >
+          <Link
+            to="/forgot-password"
+            style={{
+              textDecoration: "none",
+              color: "#2563eb",
+              fontSize: "0.88rem",
+              fontWeight: 500,
+            }}
+          >
+            Forgot Password?
+          </Link>
+        </Box>
+
         {/* Sign In Button */}
         <Button
           fullWidth
@@ -195,9 +275,17 @@ function SigninForm() {
           type="submit"
           sx={{
             mt: 3,
-            py: 1.5,
-            background: "#1e3a8a",
-            fontWeight: "bold",
+            py: 1.4,
+            borderRadius: 2,
+            backgroundColor: "#2563eb",
+            fontWeight: 600,
+            fontSize: "1rem",
+            textTransform: "none",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: "#1d4ed8",
+              boxShadow: "none",
+            },
           }}
         >
           Sign In
@@ -206,7 +294,11 @@ function SigninForm() {
         {/* Sign Up */}
         <Typography
           align="center"
-          sx={{ mt: 3 }}
+          sx={{
+            mt: 3,
+            color: "#64748b",
+            fontSize: "0.92rem",
+          }}
         >
           Don't have an account?{" "}
 
@@ -215,7 +307,7 @@ function SigninForm() {
             style={{
               textDecoration: "none",
               color: "#1e3a8a",
-              fontWeight: "bold",
+              fontWeight: 600,
             }}
           >
             Sign Up

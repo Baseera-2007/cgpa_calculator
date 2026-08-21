@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -214,3 +214,19 @@ class SubjectAttendance(Base):
     student = relationship("Student")
 
     assigned_subject = relationship("AssignedSubject")
+
+# ==========================================
+# Password Reset Code Table
+# ==========================================
+class PasswordResetCode(Base):
+    __tablename__ = "password_reset_codes"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    email = Column(String, nullable=False, index=True)
+
+    code = Column(String, nullable=False)
+
+    expires_at = Column(DateTime, nullable=False)
+
+    verified = Column(Integer, default=0)

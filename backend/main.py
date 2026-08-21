@@ -20,10 +20,11 @@ from models import (
     Attendance,
     AssignedSubject,
     ArrearHistory,
-    SubjectAttendance
+    SubjectAttendance,
+    PasswordResetCode
 )
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import Optional, List
 
 from cgpa import (
@@ -75,17 +76,20 @@ class SignupRequest(BaseModel):
     register_number: Optional[str] = None
     faculty_id: Optional[str] = None
 
-    department: str
-    batch: str
-    section: str
-    gender: str
+    department: Optional[str] = None
+    batch: Optional[str] = None
+    gender: Optional[str] = None
 
 
 class LoginRequest(BaseModel):
-    username: str
     password: str
     role: str
+
+    register_number: Optional[str] = None
     faculty_id: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
 
 
 class StudentUpdate(BaseModel):
@@ -146,21 +150,7 @@ def signup(user: SignupRequest):
     try:
 
         # -----------------------------
-        # Username already exists?
-        # -----------------------------
-
-        existing = db.query(User).filter(
-            User.username == user.username
-        ).first()
-
-        if existing:
-            raise HTTPException(
-                status_code=400,
-                detail="Username already exists"
-            )
-
-        # -----------------------------
-        # Student Validation
+        # Student Signup
         # -----------------------------
 
         if user.role == "student":
@@ -170,6 +160,27 @@ def signup(user: SignupRequest):
                     status_code=400,
                     detail="Register Number is required."
                 )
+
+            if not user.batch:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Academic Batch is required."
+                )
+
+            if not user.gender:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Gender is required."
+                )
+
+            if not user.email:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Email is required."
+                )
+
+            # Student Department is automatically CSBS
+            department = "CSBS"
 
             existing_student = db.query(Student).filter(
                 Student.register_number == user.register_number
@@ -182,7 +193,7 @@ def signup(user: SignupRequest):
                 )
 
         # -----------------------------
-        # Staff Validation
+        # Faculty Signup
         # -----------------------------
 
         elif user.role == "staff":
@@ -192,6 +203,22 @@ def signup(user: SignupRequest):
                     status_code=400,
                     detail="Faculty ID is required."
                 )
+
+            if not user.department:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Department is required."
+                )
+
+            if not user.email:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Email is required."
+                )
+
+            department = user.department
+            batch = None
+            gender = None
 
             existing_staff = db.query(User).filter(
                 User.faculty_id == user.faculty_id
@@ -203,6 +230,27 @@ def signup(user: SignupRequest):
                     detail="Faculty ID already exists."
                 )
 
+        else:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid role."
+            )
+
+        # -----------------------------
+        # Email already exists?
+        # -----------------------------
+
+        existing_email = db.query(User).filter(
+            User.email == user.email
+        ).first()
+
+        if existing_email:
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered."
+            )
+
         # -----------------------------
         # Save User
         # -----------------------------
@@ -212,12 +260,12 @@ def signup(user: SignupRequest):
             email=user.email,
             register_number=user.register_number,
             faculty_id=user.faculty_id,
-            department=user.department,
+            department=department,
             password=user.password,
             role=user.role,
-            batch=user.batch,
-            section=user.section,
-            gender=user.gender
+            batch=user.batch if user.role == "student" else None,
+            section=None,
+            gender=user.gender if user.role == "student" else None
         )
 
         db.add(new_user)
@@ -233,9 +281,9 @@ def signup(user: SignupRequest):
             new_student = Student(
                 register_number=user.register_number,
                 student_name=user.username,
-                department=user.department,
+                department="CSBS",
                 batch=user.batch,
-                section=user.section,
+                section=None,
                 gender=user.gender,
                 current_semester=0,
                 current_cgpa=0.0
@@ -268,6 +316,77 @@ def signup(user: SignupRequest):
 
         db.close()
 
+# ==========================================================
+# FORGOT PASSWORD
+# ==========================================================
+
+@app.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest):
+
+    db = SessionLocal()
+
+    try:
+
+        # Check whether email exists
+        user = db.query(User).filter(
+            User.email == request.email
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="No account found with this email address."
+            )
+
+        # Generate 6-digit OTP
+        import random
+
+        code = str(random.randint(100000, 999999))
+
+        # OTP expires after 10 minutes
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+        # Remove previous OTPs for this email
+        db.query(PasswordResetCode).filter(
+            PasswordResetCode.email == request.email
+        ).delete()
+
+        # Save new OTP
+        reset_code = PasswordResetCode(
+            email=request.email,
+            code=code,
+            expires_at=expires_at,
+            verified=0
+        )
+
+        db.add(reset_code)
+        db.commit()
+
+        print(
+            f"PASSWORD RESET OTP for {request.email}: {code}"
+        )
+
+        return {
+            "message": "Verification code generated successfully."
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+
+    except Exception as e:
+
+        db.rollback()
+
+        print("FORGOT PASSWORD ERROR:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+    finally:
+        db.close()
 
 # ==========================================================
 # LOGIN
@@ -279,40 +398,58 @@ def login(login: LoginRequest):
     db = SessionLocal()
 
     try:
-        query = db.query(User).filter(
-            User.username == login.username,
-            User.password == login.password,
-            User.role == login.role
-        )
 
-        if login.role == "staff":
+        # -----------------------------
+        # Student Login
+        # -----------------------------
+
+        if login.role == "student":
+
+            if not login.register_number:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Register Number is required."
+                )
+
+            user = db.query(User).filter(
+                User.register_number == login.register_number,
+                User.password == login.password,
+                User.role == "student"
+            ).first()
+
+        # -----------------------------
+        # Faculty Login
+        # -----------------------------
+
+        elif login.role == "staff":
 
             if not login.faculty_id:
                 raise HTTPException(
                     status_code=400,
-                    detail="Faculty ID is required for staff login."
+                    detail="Faculty ID is required."
                 )
 
-            query = query.filter(
-                User.faculty_id == login.faculty_id
+            user = db.query(User).filter(
+                User.faculty_id == login.faculty_id,
+                User.password == login.password,
+                User.role == "staff"
+            ).first()
+
+        else:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid role."
             )
 
-        user = query.first()
-
-        print(
-    "LOGIN DEBUG:",
-    login.username,
-    login.password,
-    login.role,
-    login.faculty_id,
-    "FOUND:",
-    user
-)
+        # -----------------------------
+        # Invalid Login
+        # -----------------------------
 
         if not user:
             raise HTTPException(
                 status_code=401,
-                detail="Invalid Username, Password, Role or Faculty ID"
+                detail="Invalid login credentials."
             )
 
         return {
@@ -323,6 +460,7 @@ def login(login: LoginRequest):
         }
 
     finally:
+
         db.close()
 
 
